@@ -12,7 +12,7 @@
         "joomla/input": "~1.2|~2.0",
         "joomla/session": "~1.0|~2.0",
         "joomla/date": "^1.2",
-        "joomla/controller": "~1.0"
+        "joomla/controller": "2.0.x-dev"
     },
     "require-dev": {
         "joomla/coding-standards": "~2.0@alpha",
