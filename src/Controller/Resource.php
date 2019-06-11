@@ -6,9 +6,7 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-defined('_JEXEC') or die( 'Restricted access' );
-
-namespace Joomla\OAuth2;
+namespace Joomla\OAuth2\Controller;
 
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;

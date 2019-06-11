@@ -11,14 +11,15 @@ namespace Joomla\OAuth2\Protocol\Request;
 use Joomla\Application\AbstractApplication;
 use Joomla\Uri\Uri;
 use Joomla\OAuth2\Protocol\Request;
+use Joomla\CMS\Factory;
 
 /**
- * Oauth2ProtocolRequestHeader class
+ * Header class
  *
- * @package  Matware.Libraries
+ * @package  Joomla.Framework
  * @since    1.0
  */
-class Header
+class RequestHeader
 {
 	/**
 	 * Object constructor.
@@ -27,10 +28,10 @@ class Header
 	 */
 	public function __construct()
 	{
-		$this->_app = JFactory::getApplication();
+		$this->app = Factory::getApplication();
 
 		// Setup the database object.
-		$this->_input = $this->_app->input;
+		$this->_input = $this->app->input;
 	}
 
 	/**
@@ -174,7 +175,7 @@ class Header
 		}
 
 		// Iterate over the reserved parameters and look for them in the POST variables.
-		foreach (Oauth2ProtocolRequest::getReservedParameters() as $k)
+		foreach (Request::getReservedParameters() as $k)
 		{
 			$name = 'HTTP_OAUTH_' . strtoupper($k);
 

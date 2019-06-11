@@ -11,10 +11,10 @@ namespace Joomla\OAuth2\Protocol\Request;
 /**
  * Oauth2ProtocolRequestOptions class
  *
- * @package  Matware.Libraries
+ * @package  Joomla.Framework
  * @since    1.0
  */
-class Oauth2ProtocolRequestOptions
+class RequestOptions
 {
 	/**
 	 * Object constructor.
@@ -23,10 +23,10 @@ class Oauth2ProtocolRequestOptions
 	 */
 	public function __construct()
 	{
-		$this->_app = JFactory::getApplication();
+		$this->app = JFactory::getApplication();
 
 		// Setup the database object.
-		$this->_input = $this->_app->input;
+		$this->_input = $this->app->input;
 	}
 
 	/**
@@ -39,7 +39,7 @@ class Oauth2ProtocolRequestOptions
 	public function processVars()
 	{
 		// Get a JURI instance for the Request URL.
-		$uri = new JURI($this->_app->get('uri.Request'));
+		$uri = new JURI($this->app->get('uri.Request'));
 
 		// Initialise params array.
 		$params = array();

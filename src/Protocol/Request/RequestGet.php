@@ -8,17 +8,17 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
-use Joomla\Application\AbstractApplication;
-use Joomla\Uri\Uri;
+use Joomla\CMS\Factory;
 use Joomla\OAuth2\Protocol\Request;
+use Joomla\Uri\Uri;
 
 /**
  * Oauth2ProtocolRequestGet class
  *
- * @package  Matware.Libraries
+ * @package  Joomla.Framework
  * @since    1.0
  */
-class Get
+class RequestGet
 {
 	/**
 	 * Object constructor.
@@ -27,10 +27,10 @@ class Get
 	 */
 	public function __construct()
 	{
-		$this->_app = new AbstractApplication();
+		$this->app = Factory::getApplication();
 
 		// Setup the database object.
-		$this->_input = $this->_app->input;
+		$this->_input = $this->app->input;
 	}
 
 	/**
@@ -43,7 +43,7 @@ class Get
 	public function processVars()
 	{
 		// Get a Uri instance for the Request URL.
-		$uri = new Uri($this->_app->get('uri.Request'));
+		$uri = new Uri($this->app->get('uri.Request'));
 
 		// Initialise params array.
 		$params = array();
@@ -83,7 +83,7 @@ class Get
 	public function _fetchStringForSigning($requestUrl, $requestMethod)
 	{
 		// Get a JURI instance for the Request URL.
-		$uri = new JURI($requestUrl);
+		$uri = new Uri($requestUrl);
 
 		// Initialise base array.
 		$base = array();

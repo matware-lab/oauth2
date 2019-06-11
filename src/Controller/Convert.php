@@ -6,13 +6,14 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-defined('_JEXEC') or die( 'Restricted access' );
-
 namespace Joomla\OAuth2\Controller;
 
 use Joomla\Controller\AbstractController;
 use Joomla\OAuth2\Client;
 use Joomla\OAuth2\Controller\Base;
+use Joomla\OAuth2\Protocol\Request;
+use Joomla\OAuth2\Protocol\Response;
+use Joomla\OAuth2\Credentials\Credentials;
 
 /**
  * OAuth Controller class for converting authorised credentials to token credentials.
@@ -31,16 +32,16 @@ class Convert extends Base
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Oauth2ProtocolRequest $request = null, Oauth2ProtocolResponse $response = null)
+	public function __construct(Request $request = null, Response $response = null)
 	{
 		// Call parent first
 		parent::__construct();
 
 		// Setup the Request object.
-		$this->request = isset($request) ? $request : new Oauth2ProtocolRequest;
+		$this->request = isset($request) ? $request : new Request;
 
 		// Setup the response object.
-		$this->response = isset($response) ? $response : new Oauth2ProtocolResponse;
+		$this->response = isset($response) ? $response : new Response;
 	}
 
 	/**
@@ -56,7 +57,7 @@ class Convert extends Base
 		$this->initialise();
 
 		// Get the credentials for the Request.
-		$credentials = new Oauth2Credentials($this->request);
+		$credentials = new Credentials($this->request);
 		$credentials->load();
 
 		// Getting the client object

@@ -6,8 +6,6 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-defined('_JEXEC') or die( 'Restricted access' );
-
 namespace Joomla\OAuth2\Controller;
 
 use Joomla\Controller\AbstractController;

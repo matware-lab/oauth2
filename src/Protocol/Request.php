@@ -8,16 +8,19 @@
 
 namespace Joomla\OAuth2\Protocol;
 
-use Joomla\OAuth2\Table\CredentialsTable;
 use Joomla\Uri\Uri;
+use Joomla\CMS\Factory;
+use Joomla\OAuth2\Table\CredentialsTable;
 use Joomla\OAuth2\Protocol\Response;
-use Joomla\OAuth2\Protocol\Request\Header;
-use Joomla\Application\AbstractApplication;
+use Joomla\OAuth2\Protocol\Request\RequestGet;
+use Joomla\OAuth2\Protocol\Request\RequestPost;
+use Joomla\OAuth2\Protocol\Request\RequestHeader;
+use Joomla\OAuth2\Protocol\Request\RequestOptions;
 
 /**
  * Request class
  *
- * @package  Matware.Libraries
+ * @package  Joomla.Framework
  * @since    1.0
  */
 class Request
@@ -147,10 +150,10 @@ class Request
 	public function __construct(CredentialsTable $table = null)
 	{
 		// Load the Joomla! application
-		$this->_app = new AbstractApplication();
+		$this->app = Factory::getApplication();
 
 		// Setup the database object.
-		$this->_input = $this->_app->input;
+		$this->_input = $this->app->input;
 
 		// Getting the URI
 		$this->_uri = new Uri($this->_fetchRequestUrl());
@@ -180,7 +183,7 @@ class Request
 		$flag = false;
 
 		// Loading the response class
-		$requestHeader = new Header;
+		$requestHeader = new RequestHeader;
 
 		// First we look and see if we have an appropriate Authorization header.
 		$authorization = $requestHeader->fetchAuthorizationHeader();
@@ -202,7 +205,7 @@ class Request
 		$method = strtolower($this->_method);
 
 		// Building the class name
-		$class = ucfirst($method);
+		$class = 'Request' . ucfirst($method);
 
 		// Creating the class
 		$request = new $class;

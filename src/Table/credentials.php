@@ -8,6 +8,9 @@
 
 namespace Joomla\OAuth2\Table;
 
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\Factory;
+
 /**
  * OAuth2 Client Table
  *
@@ -15,7 +18,7 @@ namespace Joomla\OAuth2\Table;
  * @subpackage  OAuth2
  * @since       1.0
  */
-class CredentialsTable extends JTable
+class CredentialsTable extends Table
 {
 	/**
 	 * Constructor
@@ -41,7 +44,7 @@ class CredentialsTable extends JTable
 		// Build the query to delete the rows from the database.
 		$query = $this->_db->getQuery(true);
 		$query->delete('#__webservices_credentials')
-			->where(array('DATE_ADD(expiration_date, INTERVAL 1 HOUR) < ' . $this->_db->quote(JFactory::getDate('now', 'America/Buenos_Aires')->toSql(true)),
+			->where(array('DATE_ADD(expiration_date, INTERVAL 1 HOUR) < ' . $this->_db->quote(Factory::getDate('now')->toSql(true)),
 				'expiration_date > 0'), 'AND');
 
 		// Set and execute the query.
@@ -50,7 +53,7 @@ class CredentialsTable extends JTable
 
 		$query = $this->_db->getQuery(true);
 		$query->delete('#__webservices_credentials')
-			->where(array('DATE_ADD(temporary_expiration_date, INTERVAL 1 HOUR) < ' . $this->_db->quote(JFactory::getDate('now', 'America/Buenos_Aires')->toSql(true))), 'AND');
+			->where(array('DATE_ADD(temporary_expiration_date, INTERVAL 1 HOUR) < ' . $this->_db->quote(Factory::getDate('now')->toSql(true))), 'AND');
 
 		// Set and execute the query.
 		$this->_db->setQuery($query);
@@ -111,7 +114,7 @@ class CredentialsTable extends JTable
 		$query->select('*')
 		->from('#__webservices_credentials')
 		->where($this->_db->quoteName('access_token') . ' = ' . $this->_db->quote($key))
-		->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(JFactory::getDate('now', 'America/Buenos_Aires')->toSql(true)));
+		->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(Factory::getDate('now')->toSql(true)));
 		//->where($this->_db->quoteName('resource_uri') . ' = ' . $this->_db->quote($uri));
 
 		// Set and execute the query.
@@ -149,7 +152,7 @@ class CredentialsTable extends JTable
 		$query->select('*')
 		->from('#__webservices_credentials')
 		->where($this->_db->quoteName('refresh_token') . ' = ' . $this->_db->quote($key))
-		->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(JFactory::getDate('now', 'America/Buenos_Aires')->toSql(true)));
+		->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(Factory::getDate('now')->toSql(true)));
 		//->where($this->_db->quoteName('resource_uri') . ' = ' . $this->_db->quote($uri));
 
 		// Set and execute the query.

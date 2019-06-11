@@ -11,10 +11,10 @@ namespace Joomla\OAuth2\Protocol\Request;
 /**
  * Oauth2ProtocolRequestPost class
  *
- * @package  Matware.Libraries
+ * @package  Joomla.Framework
  * @since    1.0
  */
-class Oauth2ProtocolRequestPost
+class RequestPost
 {
 	/**
 	 * Object constructor.
@@ -23,10 +23,10 @@ class Oauth2ProtocolRequestPost
 	 */
 	public function __construct()
 	{
-		$this->_app = JFactory::getApplication();
+		$this->app = JFactory::getApplication();
 
 		// Setup the database object.
-		$this->_input = $this->_app->input;
+		$this->_input = $this->app->input;
 	}
 
 	/**
