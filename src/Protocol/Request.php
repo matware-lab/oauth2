@@ -146,6 +146,7 @@ class Request
 	 * @param   CredentialsTable  $table  Connector object for table class.
 	 *
 	 * @since   1.0
+	 * @throws
 	 */
 	public function __construct(CredentialsTable $table = null)
 	{
@@ -205,7 +206,7 @@ class Request
 		$method = strtolower($this->_method);
 
 		// Building the class name
-		$class = 'Request' . ucfirst($method);
+		$class = '\Joomla\OAuth2\Protocol\Request\Request' . ucfirst($method);
 
 		// Creating the class
 		$request = new $class;

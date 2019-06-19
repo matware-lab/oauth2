@@ -6,13 +6,12 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-defined('_JEXEC') or die('Restricted access');
-
 namespace Joomla\OAuth2;
 
 use Joomla\Registry\Registry;
 use Joomla\Http\Http;
-use Joomla\Application;
+use Joomla\CMS\Application;
+use Joomla\CMS\Factory;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;
 
@@ -72,7 +71,7 @@ class Server
 		$this->response = isset($response) ? $response : new Response;
 
 		// Getting application
-		$this->_app = new Application;
+		$this->_app = Factory::getApplication();
 	}
 
 	/**
