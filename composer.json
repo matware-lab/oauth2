@@ -5,6 +5,8 @@
     "keywords": ["joomla", "framework", "oauth2", "server", "plugin"],
     "homepage": "https://github.com/matware-lab/oauth2",
     "license": "GPL-2.0-or-later",
+    minimum-stability: "dev",
+    prefer-stable: true,
     "require": {
         "php": "^5.3.10|~7.0",
         "joomla/application": "~1.0|~2.0",
