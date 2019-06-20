@@ -6,23 +6,23 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials\State;
 
+use Joomla\CMS\Factory;
 use Joomla\OAuth2\Credentials\State;
 use Joomla\OAuth2\Credentials\Credentials;
 use Joomla\OAuth2\Credentials\State\Temporary;
 use LogicException;
+use DateInterval;
 
 /**
- * OAuth New Credentials class for the Matware.Libraries
+ * OAuth New Credentials class for the Joomla.Framework
  *
  * @package     Joomla.Framework
  * @subpackage  OAuth2
  * @since       1.0
  */
-class New extends State
+class Initial extends State
 {
 	/**
 	 * Method to authorise the credentials.  This will persist a temporary credentials set to be authorised by
@@ -78,10 +78,11 @@ class New extends State
 	 *
 	 * @url http://php.net/manual/en/class.dateinterval.php
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  Temporary
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
+	 * @throws  \Exception
 	 */
 	public function initialise($clientId, $clientSecret, $callbackUrl, $lifetime = 'PT4H')
 	{
@@ -97,7 +98,7 @@ class New extends State
 
 		// Set the correct date adding the lifetime
 		// @@ TODO: Fix static timezone
-		$date = JFactory::getDate('now', 'America/Buenos_Aires');
+		$date = Factory::getDate('now');
 		$date->add(new DateInterval($lifetime));
 		$this->table->expiration_date = $date->toSql(true);
 
@@ -110,7 +111,7 @@ class New extends State
 	/**
 	 * Method to revoke a set of token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  void
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
