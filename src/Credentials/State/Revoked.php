@@ -11,7 +11,7 @@
 namespace Joomla\OAuth2\Credentials\State;
 
 /**
- * OAuth Revoked Credentials class for the Matware.Libraries
+ * OAuth Revoked Credentials class for the Joomla.Framework
  *
  * @package     Joomla.Framework
  * @subpackage  OAuth2
@@ -26,7 +26,7 @@ class Revoked extends State
 	 * @param   integer  $resourceOwnerId  The id of the resource owner authorizing the temporary credentials.
 	 * @param   integer  $lifetime         How long the permanent credentials should be valid (defaults to forever).
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
@@ -39,7 +39,7 @@ class Revoked extends State
 	/**
 	 * Method to convert a set of authorised credentials to token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
@@ -52,7 +52,7 @@ class Revoked extends State
 	/**
 	 * Method to deny a set of temporary credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
@@ -70,7 +70,7 @@ class Revoked extends State
 	 * @param   string   $callbackUrl  The callback URL to set for the temporary credentials.
 	 * @param   integer  $lifetime     How long the credentials are good for.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
@@ -83,7 +83,7 @@ class Revoked extends State
 	/**
 	 * Method to revoke a set of token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException

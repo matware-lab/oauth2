@@ -6,12 +6,16 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials\State;
 
+use Joomla\CMS\Factory;
+use Joomla\OAuth2\Credentials\Credentials;
+use Joomla\OAuth2\Credentials\State;
+use Joomla\OAuth2\Credentials\State\Authorised;
+use DateInterval;
+
 /**
- * OAuth Temporary Credentials class for the Matware.Libraries
+ * OAuth Temporary Credentials class for the Joomla.Framework
  *
  * @package     Joomla.Framework
  * @subpackage  OAuth2
@@ -28,34 +32,34 @@ class Temporary extends State
 	 *
 	 * @url http://php.net/manual/en/class.dateinterval.php
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  Authorised
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \Exception
 	 */
 	public function authorise($resourceOwnerId, $lifetime = 'PT4H')
 	{
 		// Setup the properties for the credentials.
 		$this->table->resource_owner_id = (int) $resourceOwnerId;
-		$this->table->type = Oauth2Credentials::AUTHORISED;
+		$this->table->type = Credentials::AUTHORISED;
 		$this->table->temporary_token = $this->randomKey();
 
 		if ($lifetime > 0)
 		{
 			// Set the correct date adding the lifetime
-			$date = JFactory::getDate();
+			$date = Factory::getDate();
 			$date->add(new DateInterval($lifetime));
 			$this->table->expiration_date = $date->toSql();
 		}
 		else
 		{
-			$this->table->expiration_date = 0;
+			$this->table->expiration_date = '00-00-0000 00:00:00';
 		}
 
 		// Persist the object in the database.
 		$this->update();
 
-		$authorised = new Oauth2CredentialsStateAuthorised($this->table);
+		$authorised = new Authorised($this->table);
 
 		return $authorised;
 	}
@@ -63,30 +67,30 @@ class Temporary extends State
 	/**
 	 * Method to convert a set of authorised credentials to token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \Exception
 	 */
 	public function convert()
 	{
-		throw new LogicException('Only authorised credentials can be converted.');
+		throw new \Exception('Only authorised credentials can be converted.');
 	}
 
 	/**
 	 * Method to deny a set of temporary credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \Exception
 	 */
 	public function deny()
 	{
 		// Remove the credentials from the database.
 		$this->delete();
 
-		return new Oauth2CredentialsStateDenied($this->table);
+		return new Denied($this->table);
 	}
 
 	/**
@@ -98,7 +102,7 @@ class Temporary extends State
 	 * @param   string   $callbackUrl   The callback URL to set for the temporary credentials.
 	 * @param   integer  $lifetime      How long the credentials are good for.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
@@ -111,7 +115,7 @@ class Temporary extends State
 	/**
 	 * Method to revoke a set of token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
 	 * @since   1.0
 	 * @throws  LogicException

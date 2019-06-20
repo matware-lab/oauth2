@@ -6,14 +6,21 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials;
 
 use Joomla\OAuth2\Protocol\Request;
+use Joomla\OAuth2\Credentials\Signer;
+use Joomla\OAuth2\Credentials\State\Initial;
+use Joomla\OAuth2\Credentials\State\Authorised;
+use Joomla\OAuth2\Credentials\State\Temporary;
+use Joomla\OAuth2\Credentials\State\Token;
+use Joomla\OAuth2\Table\CredentialsTable;
+use Joomla\OAuth2\Table\ClientsTable;
+use Joomla\CMS\Factory;
+use InvalidArgumentException;
 
 /**
- * OAuth Credentials base class for the Matware.Libraries
+ * OAuth Credentials base class for the Joomla.Framework
  *
  * @package     Joomla.Framework
  * @subpackage  OAuth2
@@ -52,7 +59,7 @@ class Credentials
 	public $state;
 
 	/**
-	 * @var    Oauth2ProtocolRequest   The current HTTP Request.
+	 * @var    Request   The current HTTP Request.
 	 * @since  1.0
 	 */
 	public $request;
@@ -66,37 +73,41 @@ class Credentials
 	/**
 	 * Object constructor.
 	 *
-	 * @param   Oauth2ProtocolRequest   $request  The HTTP Request
-	 * @param   Credentials  $table    Connector object for table class.
+	 * @param   Request     $request The HTTP Request
+	 * @param   Credentials $table   Connector object for table class.
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Request $request, Credentials $table = null)
+	public function __construct(Request $request, CredentialsTable $table = null)
 	{
 		// Load the HTTP Request
 		$this->request = $request ? $request : new Request;
 
+		// Get the database instance
+		$this->db = Factory::getDbo();
+
 		// Setup the database object.
-		$this->table = $table ? $table : JTable::getInstance('Credentials', 'Oauth2Table');
+		$this->table = $table ? $table : new CredentialsTable();
 
 		// Assume the base state for any credentials object to be new.
-		$this->state = new Oauth2CredentialsStateNew($this->table);
+		$this->state = new Initial($this->table);
 
 		// Setup the correct signer
 		$signature = isset($this->request->signature_method) ? $this->request->signature_method : 'PLAINTEXT';
-		$this->signer = Oauth2CredentialsSigner::getInstance($signature);
+
+		$this->signer = Signer::getInstance($signature);
 	}
 
 	/**
 	 * Method to authorise the credentials.  This will persist a temporary credentials set to be authorised by
 	 * a resource owner.
 	 *
-	 * @param   integer  $resourceOwnerId  The id of the resource owner authorizing the temporary credentials.
+	 * @param   integer $resourceOwnerId The id of the resource owner authorizing the temporary credentials.
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	public function authorise($resourceOwnerId)
 	{
@@ -108,8 +119,8 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	public function convert()
 	{
@@ -121,8 +132,8 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	public function deny()
 	{
@@ -254,13 +265,13 @@ class Credentials
 	 * Method to initialise the credentials.  This will persist a temporary credentials set to be authorised by
 	 * a resource owner.
 	 *
-	 * @param   string  $clientId  The key of the client requesting the temporary credentials.
-	 * @param   int     $lifetime  The lifetime limit of the token.
+	 * @param   string $clientId The key of the client requesting the temporary credentials.
+	 * @param   string $lifetime The lifetime limit of the token.
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	public function initialise($clientId, $lifetime = 'PT4H')
 	{
@@ -272,13 +283,14 @@ class Credentials
 	/**
 	 * Perform a password authentication challenge.
 	 *
-	 * @param   Oauth2Client  $client  The client.
+	 * @param   ClientsTable $client The client.
 	 *
 	 * @return  boolean  True if authentication is ok, false if not
 	 *
 	 * @since   1.0
+	 * @throws
 	 */
-	public function doJoomlaAuthentication(Oauth2Client $client)
+	public function doJoomlaAuthentication(ClientsTable $client)
 	{
 		return $this->signer->doJoomlaAuthentication($client, $this->request);
 	}
@@ -288,8 +300,8 @@ class Credentials
 	 *
 	 * @return  boolean
 	 *
-	 * @since   1.0
 	 * @throws  InvalidArgumentException
+	 * @since   1.0
 	 */
 	public function load()
 	{
@@ -297,7 +309,7 @@ class Credentials
 		$this->table->credentials_id = 0;
 
 		// Load the credential
-		if ( isset($this->request->response_type) && !isset($this->request->access_token) && !isset($this->request->refresh_token) )
+		if (isset($this->request->response_type) && !isset($this->request->access_token) && !isset($this->request->refresh_token))
 		{
 			// Get the correct client secret key
 			$key = $this->signer->secretDecode($this->request->client_secret);
@@ -330,7 +342,7 @@ class Credentials
 		// If nothing was found we will setup a new credential state object.
 		if (!$this->table->credentials_id)
 		{
-			$this->state = new Oauth2CredentialsStateNew($this->table);
+			$this->state = new Initial($this->table);
 
 			return false;
 		}
@@ -341,19 +353,19 @@ class Credentials
 		// If we are loading a temporary set of credentials load that state.
 		if ($this->table->type === self::TEMPORARY)
 		{
-			$this->state = new Oauth2CredentialsStateTemporary($this->table);
+			$this->state = new Temporary($this->table);
 		}
 
 		// If we are loading a authorised set of credentials load that state.
 		elseif ($this->table->type === self::AUTHORISED)
 		{
-			$this->state = new Oauth2CredentialsStateAuthorised($this->table);
+			$this->state = new Authorised($this->table);
 		}
 
 		// If we are loading a token set of credentials load that state.
 		elseif ($this->table->type === self::TOKEN)
 		{
-			$this->state = new Oauth2CredentialsStateToken($this->table);
+			$this->state = new Token($this->table);
 		}
 
 		// Unknown OAuth credential type.
@@ -382,8 +394,8 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	public function revoke()
 	{

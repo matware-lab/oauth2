@@ -8,8 +8,12 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
+use Joomla\CMS\Factory;
+use Joomla\Uri\Uri;
+use Joomla\OAuth2\Protocol\Request;
+
 /**
- * Oauth2ProtocolRequestOptions class
+ * RequestOptions class
  *
  * @package  Joomla.Framework
  * @since    1.0
@@ -23,7 +27,7 @@ class RequestOptions
 	 */
 	public function __construct()
 	{
-		$this->app = JFactory::getApplication();
+		$this->app = Factory::getApplication();
 
 		// Setup the database object.
 		$this->_input = $this->app->input;
@@ -39,13 +43,13 @@ class RequestOptions
 	public function processVars()
 	{
 		// Get a JURI instance for the Request URL.
-		$uri = new JURI($this->app->get('uri.Request'));
+		$uri = new Uri($this->app->get('uri.Request'));
 
 		// Initialise params array.
 		$params = array();
 
 		// Iterate over the reserved parameters and look for them in the POST variables.
-		foreach (Oauth2ProtocolRequest::getReservedParameters() as $k)
+		foreach (Request::getReservedParameters() as $k)
 		{
 			if ($this->_input->get->getString('oauth_' . $k, false))
 			{

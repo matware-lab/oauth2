@@ -6,21 +6,22 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials\State;
 
 use LogicException;
-use Joomla\Date;
+use Joomla\OAuth2\Credentials\State;
+use Joomla\OAuth2\Credentials\Credentials;
+use Joomla\CMS\Factory;
+use DateInterval;
 
 /**
- * OAuth Token Credentials class for the Matware.Libraries
+ * OAuth Token Credentials class for the Joomla.Framework
  *
  * @package     Joomla.Framework
  * @subpackage  OAuth2
  * @since       1.0
  */
-class Token extends Oauth2CredentialsState
+class Token extends State
 {
 	/**
 	 * Method to authorise the credentials.  This will persist a temporary credentials set to be authorised by
@@ -46,7 +47,7 @@ class Token extends Oauth2CredentialsState
 	 *
 	 * @url http://php.net/manual/en/class.dateinterval.php
 	 *
-	 * @return  Oauth2CredentialsStateToken
+	 * @return  Token
 	 *
 	 * @since   1.0
 	 * @throws  \Exception
@@ -57,21 +58,21 @@ class Token extends Oauth2CredentialsState
 		$this->table->callback_url = '';
 		$this->table->access_token = $this->randomKey();
 		$this->table->refresh_token = $this->randomKey();
-		$this->table->type = Oauth2Credentials::TOKEN;
+		$this->table->type = Credentials::TOKEN;
 
 		// Set the correct date adding the lifetime
 		// @@ TODO: Fix static timezone
-		$date = new Date('now');
+		$date = Factory::getDate('now');
 		$date->add(new DateInterval($lifetime));
 		$this->table->expiration_date = $date->toSql(true);
 
 		// Clean the temporary expitation date
-		$this->table->temporary_expiration_date = 0;
+		$this->table->temporary_expiration_date = '00-00-0000 00:00:00';
 
 		// Persist the object in the database.
 		$this->update();
 
-		return new Oauth2CredentialsStateToken($this->table);
+		return new Token($this->table);
 	}
 
 	/**
@@ -109,7 +110,7 @@ class Token extends Oauth2CredentialsState
 	/**
 	 * Method to revoke a set of token credentials.
 	 *
-	 * @return  Oauth2CredentialsStateRevoked
+	 * @return  Revoked
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
@@ -119,6 +120,6 @@ class Token extends Oauth2CredentialsState
 		// Remove the credentials from the database.
 		$this->delete();
 
-		return new Oauth2CredentialsStateRevoked($this->table);
+		return new Revoked($this->table);
 	}
 }

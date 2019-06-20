@@ -8,8 +8,10 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
+use Joomla\CMS\Factory;
+
 /**
- * Oauth2ProtocolRequestPost class
+ * RequestPost class
  *
  * @package  Joomla.Framework
  * @since    1.0
@@ -23,7 +25,7 @@ class RequestPost
 	 */
 	public function __construct()
 	{
-		$this->app = JFactory::getApplication();
+		$this->app = Factory::getApplication();
 
 		// Setup the database object.
 		$this->_input = $this->app->input;
@@ -49,7 +51,7 @@ class RequestPost
 		$parameters = array();
 
 		// Iterate over the reserved parameters and look for them in the POST variables.
-		foreach (Oauth2ProtocolRequest::getReservedParameters() as $k)
+		foreach (Request::getReservedParameters() as $k)
 		{
 			if ($this->_input->post->getString('oauth_' . $k, false))
 			{

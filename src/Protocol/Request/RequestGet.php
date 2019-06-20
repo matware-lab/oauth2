@@ -13,7 +13,7 @@ use Joomla\OAuth2\Protocol\Request;
 use Joomla\Uri\Uri;
 
 /**
- * Oauth2ProtocolRequestGet class
+ * RequestGet class
  *
  * @package  Joomla.Framework
  * @since    1.0

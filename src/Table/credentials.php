@@ -10,6 +10,8 @@ namespace Joomla\OAuth2\Table;
 
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseDriver;
+use Joomla\CMS\Dispatcher\DispatcherInterface;
 
 /**
  * OAuth2 Client Table
@@ -23,13 +25,18 @@ class CredentialsTable extends Table
 	/**
 	 * Constructor
 	 *
-	 * @param   JDatabaseDriver  $db  Database driver object.
+	 * @param   string              $table      The table name.
+	 * @param   string              $key        The key of the table.
+	 * @param   DatabaseDriver      $db         Database driver object.
+	 * @param   DispatcherInterface $dispatcher Dispatcher object.
 	 *
 	 * @since   1.0
 	 */
-	public function __construct($db)
+	public function __construct($table = '#__webservices_credentials', $key = 'credentials_id', DatabaseDriver $db = null, DispatcherInterface $dispatcher = null)
 	{
-		parent::__construct('#__webservices_credentials', 'credentials_id', $db);
+		$db = !empty($db) ? $db : Factory::getDbo();
+
+		parent::__construct($table, $key, $db, $dispatcher);
 	}
 
 	/**
@@ -63,10 +70,10 @@ class CredentialsTable extends Table
 	/**
 	 * Load the credentials by key.
 	 *
-	 * @param   string  $key  The key for which to load the credentials.
-	 * @param   string  $uri  The uri from the Request.
+	 * @param   string $key The key for which to load the credentials.
+	 * @param   string $uri The uri from the Request.
 	 *
-	 * @return  void
+	 * @return  boolean
 	 *
 	 * @since 1.0
 	 */
@@ -75,9 +82,11 @@ class CredentialsTable extends Table
 		// Build the query to load the row from the database.
 		$query = $this->_db->getQuery(true);
 		$query->select('*')
-		->from('#__webservices_credentials')
-		->where($this->_db->quoteName('client_secret') . ' = ' . $this->_db->quote($key));
+			->from('#__webservices_credentials')
+			->where($this->_db->quoteName('client_secret') . ' = ' . $this->_db->quote($key));
 		//->where($this->_db->quoteName('resource_uri') . ' = ' . $this->_db->quote($uri));
+		$query->order('credentials_id DESC');
+		$query->setLimit(1);
 
 		// Set and execute the query.
 		$this->_db->setQuery($query);
@@ -100,10 +109,10 @@ class CredentialsTable extends Table
 	/**
 	 * Load the credentials by key.
 	 *
-	 * @param   string  $key  The key for which to load the credentials.
-	 * @param   string  $uri  The uri from the Request.
+	 * @param   string $key The key for which to load the credentials.
+	 * @param   string $uri The uri from the Request.
 	 *
-	 * @return  void
+	 * @return  boolean
 	 *
 	 * @since 1.0
 	 */
@@ -112,9 +121,9 @@ class CredentialsTable extends Table
 		// Build the query to load the row from the database.
 		$query = $this->_db->getQuery(true);
 		$query->select('*')
-		->from('#__webservices_credentials')
-		->where($this->_db->quoteName('access_token') . ' = ' . $this->_db->quote($key))
-		->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(Factory::getDate('now')->toSql(true)));
+			->from('#__webservices_credentials')
+			->where($this->_db->quoteName('access_token') . ' = ' . $this->_db->quote($key))
+			->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(Factory::getDate('now')->toSql(true)));
 		//->where($this->_db->quoteName('resource_uri') . ' = ' . $this->_db->quote($uri));
 
 		// Set and execute the query.
@@ -138,8 +147,8 @@ class CredentialsTable extends Table
 	/**
 	 * Load the credentials by key.
 	 *
-	 * @param   string  $key  The key for which to load the credentials.
-	 * @param   string  $uri  The uri from the Request.
+	 * @param   string $key The key for which to load the credentials.
+	 * @param   string $uri The uri from the Request.
 	 *
 	 * @return  void
 	 *
@@ -150,9 +159,9 @@ class CredentialsTable extends Table
 		// Build the query to load the row from the database.
 		$query = $this->_db->getQuery(true);
 		$query->select('*')
-		->from('#__webservices_credentials')
-		->where($this->_db->quoteName('refresh_token') . ' = ' . $this->_db->quote($key))
-		->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(Factory::getDate('now')->toSql(true)));
+			->from('#__webservices_credentials')
+			->where($this->_db->quoteName('refresh_token') . ' = ' . $this->_db->quote($key))
+			->where($this->_db->quoteName('expiration_date') . ' > ' . $this->_db->quote(Factory::getDate('now')->toSql(true)));
 		//->where($this->_db->quoteName('resource_uri') . ' = ' . $this->_db->quote($uri));
 
 		// Set and execute the query.

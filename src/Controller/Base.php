@@ -8,8 +8,10 @@
 
 namespace Joomla\OAuth2\Controller;
 
+use Joomla\CMS\Factory;
 use Joomla\Controller\AbstractController;
-use Joomla\OAuth2\Client;
+use Joomla\OAuth2\Table\ClientsTable;
+
 
 /**
  * OAuth Controller class for initiating temporary credentials.
@@ -21,7 +23,7 @@ use Joomla\OAuth2\Client;
 class Base extends AbstractController
 {
 	/**
-	 * Method required by JControllerBase
+	 * Method required by AbstractController
 	 *
 	 * @return  void
 	 *
@@ -29,6 +31,24 @@ class Base extends AbstractController
 	 */
 	public function execute()
 	{
+	}
+
+	/**
+	 * Constructor.
+	 *
+	 * @param   Request   $request   The Request object
+	 * @param   Response  $response  The response object
+	 *
+	 * @since   1.0
+	 * @throws
+	 */
+	public function __construct(Request $request = null, Response $response = null)
+	{
+		// Call parent first
+		parent::__construct();
+
+		// Setup the Request object.
+		$this->app = Factory::getApplication();
 	}
 
 	/**
@@ -41,10 +61,10 @@ class Base extends AbstractController
 	protected function initialise()
 	{
 		// Verify that we have an OAuth 2.0 application.
-		if ((!$this->app instanceof ApiApplicationWeb))
-		{
-			$this->respondError(400, 'invalid_request', 'Cannot perform OAuth 2.0 authorisation without an OAuth 2.0 application.');
-		}
+		//if ((!$this->app instanceof Joomla\CMS\Application\ApiApplication))
+		//{
+		//	$this->respondError(400, 'invalid_request', 'Cannot perform OAuth 2.0 authorisation without an OAuth 2.0 application.');
+		//}
 
 		// We need a valid signature to do initialisation.
 		if (!isset($this->request->access_token) && (!$this->request->client_id || !$this->request->client_secret || !$this->request->signature_method) )
@@ -60,7 +80,7 @@ class Base extends AbstractController
 	 *
 	 * @param   string  $client_id  The OAuth 2.0 client_id parameter for which to load the client.
 	 *
-	 * @return  Client
+	 * @return  ClientsTable
 	 *
 	 * @since   1.0
 	 * @throws  InvalidArgumentException
@@ -78,7 +98,7 @@ class Base extends AbstractController
 		}
 
 		// Get an OAuth client object and load it using the incoming client key.
-		$client = new Client;
+		$client = new ClientsTable();
 		$client->loadByKey($client_id);
 
 		// Verify the client key for the message.

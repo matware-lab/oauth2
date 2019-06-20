@@ -6,9 +6,15 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
+namespace Joomla\OAuth2\Credentials;
 
-
-namespace Joomla\OAuth2;
+use Hoa\Exception\Exception;
+use Psr\Log\InvalidArgumentException;
+use Joomla\OAuth2\Credentials\Signer\SignerHMAC;
+use Joomla\OAuth2\Credentials\Signer\Plaintext;
+use Joomla\CMS\User\UserHelper;
+use Joomla\OAuth2\Table\ClientsTable;
+use Joomla\CMS\User\User;
 
 /**
  * OAuth message signer interface.
@@ -17,14 +23,14 @@ namespace Joomla\OAuth2;
  * @subpackage  OAuth2
  * @since       1.0
  */
-class Oauth2CredentialsSigner
+class Signer
 {
 	/**
 	 * Method to get a message signer object based on the message's oauth_signature_method parameter.
 	 *
-	 * @param   string  $method  The method of the signer (HMAC-SHA1 || RSA-SHA1 || PLAINTEXT)
+	 * @param   string $method The method of the signer (HMAC-SHA1 || RSA-SHA1 || PLAINTEXT)
 	 *
-	 * @return  Oauth2CredentialsSigner  The OAuth message signer object for the message.
+	 * @return  Signer  The OAuth message signer object for the message.
 	 *
 	 * @since   1.0
 	 * @throws  InvalidArgumentException
@@ -34,14 +40,14 @@ class Oauth2CredentialsSigner
 		switch ($method)
 		{
 			case 'HMAC-SHA1':
-				$signer = new Oauth2CredentialsSignerHMAC;
+				$signer = new SignerHMAC;
 				break;
 			case 'RSA-SHA1':
 				// @TODO We don't support RSA because we don't yet have a way to inject the private key.
 				throw new InvalidArgumentException('RSA signatures are not supported');
 				break;
 			case 'PLAINTEXT':
-				$signer = new Oauth2CredentialsSignerPlaintext;
+				$signer = new Plaintext;
 				break;
 			default:
 				throw new InvalidArgumentException('No valid signature method was found.');
@@ -54,19 +60,20 @@ class Oauth2CredentialsSigner
 	/**
 	 * Perform a password authentication challenge.
 	 *
-	 * @param   Oauth2Client  $client   The client object
-	 * @param   string         $request  The Request object.
+	 * @param   ClientsTable $client  The client object
+	 * @param   object       $request The Request object.
 	 *
 	 * @return  boolean  True if authentication is ok, false if not
 	 *
 	 * @since   1.0
+	 * @throws  \Exception
 	 */
-	public function doJoomlaAuthentication(Oauth2Client $client, $request)
+	public function doJoomlaAuthentication(ClientsTable $client, $request)
 	{
 		// Build the response for the client.
 		$types = array('PHP_AUTH_', 'PHP_HTTP_', 'PHP_');
 
-		foreach ( $types as $type )
+		foreach ($types as $type)
 		{
 			if (isset($request->_headers[$type . 'USER']))
 			{
@@ -80,7 +87,7 @@ class Oauth2CredentialsSigner
 		}
 
 		// Check if the username and password are present
-		if ( !isset($user_decode) || !isset($password_decode) )
+		if (!isset($user_decode) || !isset($password_decode))
 		{
 			if (isset($request->client_id))
 			{
@@ -100,12 +107,12 @@ class Oauth2CredentialsSigner
 		// Check if the username and password are present
 		if (!isset($user_decode) || !isset($password_decode))
 		{
-			throw new Exception('Username or password is not set');
+			throw new \Exception('Username or password is not set');
 			exit;
 		}
 
 		// Verify the password
-		$match = JUserHelper::verifyPassword($password_decode, $client->identity->password, $client->identity->id);
+		$match = UserHelper::verifyPassword($password_decode, $client->password, $client->id);
 
 		return $match;
 	}

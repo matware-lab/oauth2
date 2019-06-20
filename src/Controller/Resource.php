@@ -12,6 +12,7 @@ use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
 use Joomla\OAuth2\Controller\Base;
+use Joomla\CMS\Factory;
 
 /**
  * OAuth Controller class for initiating temporary credentials.
@@ -68,6 +69,6 @@ class Resource extends Base
 		}
 
 		// Load the JUser class on application for this client
-		$this->app->loadIdentity($client->identity);
+		$this->app->loadIdentity(Factory::getUser($client->id));
 	}
 }

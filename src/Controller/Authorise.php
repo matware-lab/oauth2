@@ -11,6 +11,7 @@ namespace Joomla\OAuth2\Controller;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
+use Joomla\CMS\Factory;
 
 /**
  * OAuth Controller class for authorising temporary credentials.
@@ -70,7 +71,7 @@ class Authorise extends Base
 		}
 
 		// Load the JUser class on application for this client
-		$this->app->loadIdentity($client->identity);
+		$this->app->loadIdentity(Factory::getUser($client->id));
 
 		// Verify that we have a signed in user.
 		if (isset($this->request->code) && $credentials->getTemporaryToken() !== $this->request->code)
@@ -79,7 +80,7 @@ class Authorise extends Base
 		}
 
 		// Ensure the credentials are temporary.
-		if ( (int) $credentials->getType() !== Oauth2Credentials::TEMPORARY)
+		if ( (int) $credentials->getType() !== Credentials::TEMPORARY)
 		{
 			$this->respondError(400, 'invalid_request', 'The token is not for a temporary credentials set.');
 		}
@@ -114,6 +115,7 @@ class Authorise extends Base
 		$this->response->setHeader('status', '200')
 			->setBody($body)
 			->respond();
-		exit;
+
+		$this->app->close();
 	}
 }

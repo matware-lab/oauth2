@@ -8,9 +8,7 @@
 
 namespace Joomla\OAuth2\Controller;
 
-use Joomla\Controller\AbstractController;
-use Joomla\OAuth2\Client;
-use Joomla\OAuth2\Controller\Base;
+use Joomla\CMS\Factory;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
@@ -27,8 +25,8 @@ class Convert extends Base
 	/**
 	 * Constructor.
 	 *
-	 * @param   Oauth2ProtocolRequest   $request   The Request object
-	 * @param   Oauth2ProtocolResponse  $response  The response object
+	 * @param   Request   $request   The Request object
+	 * @param   Response  $response  The response object
 	 *
 	 * @since   1.0
 	 */
@@ -70,10 +68,12 @@ class Convert extends Base
 		}
 
 		// Load the JUser class on application for this client
-		$this->app->loadIdentity($client->identity);
+		$this->app->loadIdentity(Factory::getUser($client->id));
+
+		$a = $credentials->getType();
 
 		// Ensure the credentials are authorised.
-		if ($credentials->getType() !== Oauth2Credentials::TOKEN && $credentials->getType() !== Oauth2Credentials::AUTHORISED)
+		if ($credentials->getType() !== Credentials::TOKEN && $credentials->getType() !== Credentials::AUTHORISED)
 		{
 			$this->respondError(400, 'invalid_request', 'The token is not for a temporary credentials set.');
 		}

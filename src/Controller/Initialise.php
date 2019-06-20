@@ -8,6 +8,7 @@
 
 namespace Joomla\OAuth2\Controller;
 
+use Joomla\CMS\Factory;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
@@ -67,11 +68,11 @@ class Initialise extends Base
 		}
 
 		// Load the JUser class on application for this client
-		$this->app->loadIdentity($client->identity);
+		$this->app->loadIdentity(Factory::getUser($client->id));
 
 		// Initialize the credentials for this Request
 		$credentials->initialise(
-			$client->identity->id,
+			$client->id,
 			$this->app->get('oauth.tokenlifetime', 'PT4H')
 		);
 

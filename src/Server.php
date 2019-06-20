@@ -14,11 +14,15 @@ use Joomla\CMS\Application;
 use Joomla\CMS\Factory;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Protocol\Response;
+use Joomla\OAuth2\Controller\Initialise;
+use Joomla\OAuth2\Controller\Authorise;
+use Joomla\OAuth2\Controller\Convert;
+use Joomla\OAuth2\Controller\Resource;
 
 /**
  * Joomla! Oauth2 Server class
  *
- * @package  Matware.Libraries
+ * @package  Joomla.Framework
  * @since    1.0
  */
 class Server
@@ -55,6 +59,7 @@ class Server
 	 * @param   Request  $request  The Request object.
 	 *
 	 * @since   1.0
+	 * @throws
 	 */
 	public function __construct(Registry $options = null, Http $http = null, Request $request = null)
 	{
@@ -70,8 +75,8 @@ class Server
 		// Setup the response object.
 		$this->response = isset($response) ? $response : new Response;
 
-		// Getting application
-		$this->_app = Factory::getApplication();
+		// Get application instance
+		$this->app = Factory::getApplication();
 	}
 
 	/**
@@ -104,19 +109,19 @@ class Server
 			{
 				case 'temporary':
 
-					$controller = new Oauth2ControllerInitialise($this->request);
+					$controller = new Initialise($this->request);
 
 					break;
 
 				case 'authorise':
 
-					$controller = new Oauth2ControllerAuthorise($this->request);
+					$controller = new Authorise($this->request);
 
 					break;
 				case 'refresh_token':
 				case 'token':
 
-					$controller = new Oauth2ControllerConvert($this->request);
+					$controller = new Convert($this->request);
 
 					break;
 				default:
@@ -128,13 +133,13 @@ class Server
 			$controller->execute();
 
 			// Exit
-			exit;
+			$this->app->close();
 		}
 
 		// If we found an REST message somewhere we need to set the URI and Request method.
 		if ($found && isset($this->request->access_token))
 		{
-			$controller = new Oauth2ControllerResource($this->request);
+			$controller = new Resource($this->request);
 			$controller->execute();
 		}
 

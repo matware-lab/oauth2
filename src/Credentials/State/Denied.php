@@ -8,6 +8,7 @@
 
 namespace Joomla\OAuth2\Credentials\State;
 
+use Joomla\OAuth2\Credentials\State;
 use LogicException;
 
 /**

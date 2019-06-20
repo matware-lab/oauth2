@@ -17,7 +17,7 @@ use Joomla\OAuth2\Credentials\Signer;
  * @subpackage  OAuth2
  * @since       1.0
  */
-class HMAC implements Signer
+class SignerHMAC implements Signer
 {
 	/**
 	 * Calculate and return the OAuth message signature using HMAC-SHA1

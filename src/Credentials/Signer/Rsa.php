@@ -18,7 +18,7 @@ use PHPUnit\Runner\Exception;
  * @subpackage  OAuth2
  * @since       1.0
  */
-class RSA implements Signer
+class SignerRSA implements Signer
 {
 	/**
 	 * @var    string  Either a PEM formatted private key or a string having the format file://path/to/file.pem. The named file must contain

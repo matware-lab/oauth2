@@ -6,11 +6,9 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials;
 
-use Joomla\OAuth2\Credentials;
+use Joomla\OAuth2\Table\CredentialsTable;
 
 /**
  * OAuth Credentials state class.
@@ -22,7 +20,7 @@ use Joomla\OAuth2\Credentials;
 abstract class State
 {
 	/**
-	 * @var    Credentials  Table object for credentials.
+	 * @var    CredentialsTable  Table object for credentials.
 	 * @since  1.0
 	 */
 	protected $table;
@@ -30,16 +28,16 @@ abstract class State
 	/**
 	 * Object constructor.
 	 *
-	 * @param   Credentials  $table       The database driver to use when persisting the object.
-	 * @param   array                    $properties  A set of properties with which to prime the object.
+	 * @param   CredentialsTable  $table       The database driver to use when persisting the object.
+	 * @param   array              $properties  A set of properties with which to prime the object.
 	 *
 	 * @codeCoverageIgnore
 	 * @since   1.0
 	 */
-	public function __construct(Credentials $table = null, array $properties = null)
+	public function __construct(CredentialsTable $table = null, array $properties = null)
 	{
 		// Setup the table object.
-		$this->table = $table ? $table : JTable::getInstance('Credentials', 'Oauth2Table');
+		$this->table = $table ? $table : new CredentialsTable();
 
 		// Iterate over any input properties and bind them to the object.
 		if ($properties)
@@ -90,30 +88,30 @@ abstract class State
 	 * @param   integer  $resourceOwnerId  The id of the resource owner authorizing the temporary credentials.
 	 * @param   integer  $lifetime         How long the permanent credentials should be valid (defaults to forever).
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	abstract public function authorise($resourceOwnerId, $lifetime = 0);
 
 	/**
 	 * Method to convert a set of authorised credentials to token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	abstract public function convert();
 
 	/**
 	 * Method to deny a set of temporary credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	abstract public function deny();
 
@@ -128,20 +126,20 @@ abstract class State
 	 *
 	 * @url http://php.net/manual/en/class.dateinterval.php
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	abstract public function initialise($clientId, $clientSecret, $callbackUrl, $lifetime = 'PT4H');
 
 	/**
 	 * Method to revoke a set of token credentials.
 	 *
-	 * @return  Oauth2CredentialsState
+	 * @return  State
 	 *
-	 * @since   1.0
 	 * @throws  LogicException
+	 * @since   1.0
 	 */
 	abstract public function revoke();
 
@@ -161,7 +159,7 @@ abstract class State
 		}
 
 		// Ensure we don't have an id to insert... use the auto-incrementor instead.
-		// U unset($this->table->credentials_id);
+		unset($this->table->credentials_id);
 
 		// Insert the object into the database.
 		return $this->table->store();

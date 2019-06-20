@@ -6,13 +6,13 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials\State;
 
-use Joomla\Date\Date;
 use LogicException;
+use Joomla\OAuth2\Credentials\State;
 use Joomla\OAuth2\Credentials\Credentials;
+use Joomla\CMS\Factory;
+use DateInterval;
 
 /**
  * OAuth2 Authorised Credentials class
@@ -27,8 +27,8 @@ class Authorised extends State
 	 * Method to authorise the credentials.  This will persist a temporary credentials set to be authorised by
 	 * a resource owner.
 	 *
-	 * @param   integer  $resourceOwnerId  The id of the resource owner authorizing the temporary credentials.
-	 * @param   integer  $lifetime         How long the permanent credentials should be valid (defaults to forever).
+	 * @param   integer $resourceOwnerId The id of the resource owner authorizing the temporary credentials.
+	 * @param   integer $lifetime        How long the permanent credentials should be valid (defaults to forever).
 	 *
 	 * @return  void
 	 *
@@ -43,31 +43,31 @@ class Authorised extends State
 	/**
 	 * Method to convert a set of authorised credentials to token credentials.
 	 *
-	 * @param   string  $lifetime  How long (DateInterval format) the credentials should be valid (defaults to 60 minutes).
+	 * @param   string $lifetime How long (DateInterval format) the credentials should be valid (defaults to 60 minutes).
 	 *
 	 * @url http://php.net/manual/en/class.dateinterval.php
 	 *
 	 * @return  Token
 	 *
+	 * @throws  \Exception
 	 * @since   1.0
-	 * @throws  LogicException
 	 */
 	public function convert($lifetime = 'PT4H')
 	{
 		// Setup the properties for the credentials.
-		$this->table->callback_url = '';
-		$this->table->access_token = $this->randomKey();
+		$this->table->callback_url  = '';
+		$this->table->access_token  = $this->randomKey();
 		$this->table->refresh_token = $this->randomKey();
-		$this->table->type = Credentials::TOKEN;
+		$this->table->type          = Credentials::TOKEN;
 
 		// Set the correct date adding the lifetime
 		// @@ TODO: Fix static timezone
-		$date = new Date('now');
+		$date = Factory::getDate('now');
 		$date->add(new DateInterval($lifetime));
-		$this->table->expiration_date = $date->toSql(true);
+		$this->table->expiration_date = $date->toSql();
 
 		// Clean the temporary expitation date
-		$this->table->temporary_expiration_date = 0;
+		$this->table->temporary_expiration_date = '00-00-0000 00:00:00';
 
 		// Persist the object in the database.
 		$this->update();
@@ -92,10 +92,10 @@ class Authorised extends State
 	 * Method to initialise the credentials.  This will persist a temporary credentials set to be authorised by
 	 * a resource owner.
 	 *
-	 * @param   string   $clientId      The key of the client requesting the temporary credentials.
-	 * @param   string   $clientSecret  The secret key of the client requesting the temporary credentials.
-	 * @param   string   $callbackUrl   The callback URL to set for the temporary credentials.
-	 * @param   integer  $lifetime      How long the credentials are good for.
+	 * @param   string  $clientId     The key of the client requesting the temporary credentials.
+	 * @param   string  $clientSecret The secret key of the client requesting the temporary credentials.
+	 * @param   string  $callbackUrl  The callback URL to set for the temporary credentials.
+	 * @param   integer $lifetime     How long the credentials are good for.
 	 *
 	 * @return  void
 	 *
