@@ -29,7 +29,7 @@ class Request
 	 * @var    string  The HTTP Request method for the message.
 	 * @since  1.0
 	 */
-	public $_method;
+	public $method;
 
 	/**
 	 * @var    array  Associative array of parameters for the REST message.
@@ -78,7 +78,7 @@ class Request
 	 * @var    JURI  The Request URI for the message.
 	 * @since  1.0
 	 */
-	private $_uri;
+	private $uri;
 
 	/**
 	 * Get the list of reserved OAuth 2.0 parameters.
@@ -118,7 +118,7 @@ class Request
 	 * Method to set the REST message parameters.  This will only set valid REST message parameters.  If non-valid
 	 * parameters are in the input array they will be ignored.
 	 *
-	 * @param   array  $parameters  The REST message parameters to set.
+	 * @param   array $parameters The REST message parameters to set.
 	 *
 	 * @return  void
 	 *
@@ -143,7 +143,7 @@ class Request
 	/**
 	 * Object constructor.
 	 *
-	 * @param   CredentialsTable  $table  Connector object for table class.
+	 * @param   CredentialsTable $table Connector object for table class.
 	 *
 	 * @since   1.0
 	 * @throws
@@ -154,16 +154,17 @@ class Request
 		$this->app = Factory::getApplication();
 
 		// Setup the database object.
-		$this->_input = $this->app->input;
+		$this->input = $this->app->input;
 
-		// Getting the URI
-		$this->_uri = new Uri($this->_fetchRequestUrl());
+		// Get URI
+		$this->uri = new Uri($this->_fetchRequestUrl());
 
 		// Getting the Request method (POST||GET)
-		$this->_method = strtoupper($_SERVER['REQUEST_METHOD']);
+		$requestMethod = $this->input->server->getString('REQUEST_METHOD');
+		$this->method  = strtoupper($requestMethod);
 
 		// Loading the response class
-		$this->_response = new Response;
+		$this->response = new Response;
 	}
 
 	/**
@@ -203,7 +204,7 @@ class Request
 		}
 
 		// Getting the method
-		$method = strtolower($this->_method);
+		$method = strtolower($this->method);
 
 		// Building the class name
 		$class = '\Joomla\OAuth2\Protocol\Request\Request' . ucfirst($method);
@@ -230,7 +231,7 @@ class Request
 	/**
 	 * Encode a string according to the RFC3986
 	 *
-	 * @param   string  $s  string to encode
+	 * @param   string $s string to encode
 	 *
 	 * @return  string encoded string
 	 *
@@ -246,7 +247,7 @@ class Request
 	 * Decode a string according to RFC3986.
 	 * Also correctly decodes RFC1738 urls.
 	 *
-	 * @param   string  $s  string to decode
+	 * @param   string $s string to decode
 	 *
 	 * @return  string  decoded string
 	 *
@@ -272,7 +273,8 @@ class Request
 		$uri = '';
 
 		// First we need to detect the URI scheme.
-		if (isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) != 'off'))
+		$https = $this->input->server->getString('HTTPS');
+		if (isset($https) && !empty($https) && (strtolower($https) != 'off'))
 		{
 			$scheme = 'https://';
 		}
@@ -288,10 +290,16 @@ class Request
 		 */
 
 		// If PHP_SELF and REQUEST_URI are both populated then we will assume "Apache Mode".
-		if (!empty($_SERVER['PHP_SELF']) && !empty($_SERVER['REQUEST_URI']))
+		$httpHost    = $this->input->server->getString('HTTP_HOST');
+		$phpSelf     = $this->input->server->getString('PHP_SELF');
+		$requestUri  = $this->input->server->getString('REQUEST_URI');
+		$scriptName  = $this->input->server->getString('SCRIPT_NAME');
+		$queryString = $this->input->server->getString('QUERY_STRING');
+
+		if (!empty($phpSelf) && !empty($requestUri))
 		{
 			// The URI is built from the HTTP_HOST and REQUEST_URI environment variables in an Apache environment.
-			$uri = $scheme . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			$uri = $scheme . $httpHost . $requestUri;
 
 			$uri = explode("?", $uri);
 			$uri = $uri[0];
@@ -301,12 +309,12 @@ class Request
 		else
 		{
 			// IIS uses the SCRIPT_NAME variable instead of a REQUEST_URI variable... thanks, MS
-			$uri = $scheme . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
+			$uri = $scheme . $httpHost . $scriptName;
 
 			// If the QUERY_STRING variable exists append it to the URI string.
-			if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING']))
+			if (isset($queryString) && !empty($queryString))
 			{
-				$uri .= '?' . $_SERVER['QUERY_STRING'];
+				$uri .= '?' . $queryString;
 			}
 		}
 
@@ -316,7 +324,7 @@ class Request
 	/**
 	 * Create a token-string
 	 *
-	 * @param   integer  $length  Length of string
+	 * @param   integer $length Length of string
 	 *
 	 * @return  string  Generated token
 	 *
