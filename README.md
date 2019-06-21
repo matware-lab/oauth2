@@ -6,7 +6,6 @@
 
 
 ## 1. Introduction
----------------
 
 The OAuth 2.0 for Joomla Api Application is based on a Louis Landry work about 
 oauth1 server suport for Joomla! Platform.
@@ -44,7 +43,6 @@ This is the basic graph of how is the process of the authentication using OAuth 
 ```
 
 ## 2. Installation
-------------------
 
 * Install a new Joomla! 4 installation
 * Configure composer minimum-stability and prefer-stable
@@ -65,7 +63,6 @@ $ composer require "matware-lab/oauth2:dev-master"
 * Disable Joomla! Basic authentication
 
 ## 3. How it works
-------------------
 
 To get one access token to get your private resource, its needed to perform 3 GET or POST request. 
 
