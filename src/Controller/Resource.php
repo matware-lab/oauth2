@@ -8,10 +8,7 @@
 
 namespace Joomla\OAuth2\Controller;
 
-use Joomla\OAuth2\Protocol\Request;
-use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
-use Joomla\OAuth2\Controller\Base;
 use Joomla\CMS\Factory;
 
 /**
@@ -23,26 +20,6 @@ use Joomla\CMS\Factory;
  */
 class Resource extends Base
 {
-	/**
-	 * Constructor.
-	 *
-	 * @param   Request   $request   The Request object
-	 * @param   Response  $response  The response object
-	 *
-	 * @since   1.0
-	 */
-	public function __construct(Request $request = null, Response $response = null)
-	{
-		// Call parent first
-		parent::__construct();
-
-		// Setup the Request object.
-		$this->request = isset($request) ? $request : new Request;
-
-		// Setup the response object.
-		$this->response = isset($response) ? $response : new Response;
-	}
-
 	/**
 	 * Handle the Request.
 	 *

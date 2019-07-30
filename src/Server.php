@@ -107,19 +107,19 @@ class Server
 			{
 				case 'temporary':
 
-					$controller = new Initialise($this->request);
+					$controller = new Initialise($this->request, $this->app);
 
 					break;
 
 				case 'authorise':
 
-					$controller = new Authorise($this->request);
+					$controller = new Authorise($this->request, $this->app);
 
 					break;
 				case 'refresh_token':
 				case 'token':
 
-					$controller = new Convert($this->request);
+					$controller = new Convert($this->request, $this->app);
 
 					break;
 				default:
@@ -137,7 +137,7 @@ class Server
 		// If we found an REST message somewhere we need to set the URI and Request method.
 		if ($found && isset($this->request->access_token))
 		{
-			$controller = new Resource($this->request);
+			$controller = new Resource($this->request, $this->app);
 			$controller->execute();
 		}
 

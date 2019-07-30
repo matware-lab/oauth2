@@ -6,6 +6,9 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
+namespace Joomla\OAuth2\Table;
+
+use Joomla\CMS\Table\User;
 
 /**
  * OAuth2 Credentials Table
@@ -13,8 +16,9 @@
  * @package     Joomla.Framework
  * @subpackage  OAuth2
  * @since       1.0
+ * TODO: In real implementation just put this in the user table
  */
-class Oauth2TableUsers extends JTableUser
+class ClientsTable extends User
 {
 	/**
 	 * Load the credentials by key.
@@ -30,7 +34,7 @@ class Oauth2TableUsers extends JTableUser
 		// Build the query to load the row from the database.
 		$query = $this->_db->getQuery(true);
 		$query->select('*')
-			->from('#__users')
+			->from($this->_db->quoteName('#__users'))
 			->where($this->_db->quoteName('username') . ' = ' . $this->_db->quote($key));
 
 		// Set and execute the query.

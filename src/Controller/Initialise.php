@@ -9,10 +9,7 @@
 namespace Joomla\OAuth2\Controller;
 
 use Joomla\CMS\Factory;
-use Joomla\OAuth2\Protocol\Request;
-use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
-use Joomla\OAuth2\Controller\Base;
 
 /**
  * OAuth Controller class for initiating temporary credentials.
@@ -23,26 +20,6 @@ use Joomla\OAuth2\Controller\Base;
  */
 class Initialise extends Base
 {
-	/**
-	 * Constructor.
-	 *
-	 * @param   Request   $request   The Request object
-	 * @param   Response  $response  The response object
-	 *
-	 * @since   1.0
-	 */
-	public function __construct(Request $request = null, Response $response = null)
-	{
-		// Call parent first
-		parent::__construct();
-
-		// Setup the Request object.
-		$this->request = isset($request) ? $request : new Request;
-
-		// Setup the response object.
-		$this->response = isset($response) ? $response : new Response;
-	}
-
 	/**
 	 * Handle the Request.
 	 *
@@ -86,7 +63,7 @@ class Initialise extends Base
  		$body = $this->prepareBody($response);
 
 		// Set the response code and body.
-		$this->response->setHeader('status', '200')
+		$this->app->setHeader('status', '200')
 			->setBody($body)
 			->respond();
 	}
