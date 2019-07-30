@@ -25,18 +25,15 @@ class CredentialsTable extends Table
 	/**
 	 * Constructor
 	 *
-	 * @param   string              $table      The table name.
-	 * @param   string              $key        The key of the table.
-	 * @param   DatabaseDriver      $db         Database driver object.
-	 * @param   DispatcherInterface $dispatcher Dispatcher object.
+	 * @param   DatabaseDriver  $db  Database driver object.
 	 *
 	 * @since   1.0
 	 */
-	public function __construct($table = '#__webservices_credentials', $key = 'credentials_id', DatabaseDriver $db = null, DispatcherInterface $dispatcher = null)
+	public function __construct(DatabaseDriver $db = null)
 	{
 		$db = !empty($db) ? $db : Factory::getDbo();
 
-		parent::__construct($table, $key, $db, $dispatcher);
+		parent::__construct('#__webservices_credentials', 'credentials_id', $db, $dispatcher);
 	}
 
 	/**

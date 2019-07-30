@@ -6,9 +6,9 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
-
-
 namespace Joomla\OAuth2\Credentials\State;
+
+use Joomla\OAuth2\Credentials\State;
 
 /**
  * OAuth Revoked Credentials class for the Joomla.Framework
@@ -29,11 +29,11 @@ class Revoked extends State
 	 * @return  State
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 */
 	public function authorise($resourceOwnerId, $lifetime = 0)
 	{
-		throw new LogicException('Only temporary credentials can be authorised.');
+		throw new \LogicException('Only temporary credentials can be authorised.');
 	}
 
 	/**
@@ -42,11 +42,11 @@ class Revoked extends State
 	 * @return  State
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 */
 	public function convert()
 	{
-		throw new LogicException('Only authorised credentials can be converted.');
+		throw new \LogicException('Only authorised credentials can be converted.');
 	}
 
 	/**
@@ -55,29 +55,30 @@ class Revoked extends State
 	 * @return  State
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 */
 	public function deny()
 	{
-		throw new LogicException('Only temporary credentials can be denied.');
+		throw new \LogicException('Only temporary credentials can be denied.');
 	}
 
-	/**
-	 * Method to initialise the credentials.  This will persist a temporary credentials set to be authorised by
-	 * a resource owner.
-	 *
-	 * @param   string   $clientKey    The key of the client requesting the temporary credentials.
-	 * @param   string   $callbackUrl  The callback URL to set for the temporary credentials.
-	 * @param   integer  $lifetime     How long the credentials are good for.
-	 *
-	 * @return  State
-	 *
-	 * @since   1.0
-	 * @throws  LogicException
-	 */
-	public function initialise($clientKey, $callbackUrl, $lifetime = 0)
+    /**
+     * Method to initialise the credentials.  This will persist a temporary credentials set to be authorised by
+     * a resource owner.
+     *
+     * @param   string  $clientId     The key of the client requesting the temporary credentials.
+     * @param   string  $clientSecret The secret key of the client requesting the temporary credentials.
+     * @param   string  $callbackUrl  The callback URL to set for the temporary credentials.
+     * @param   integer $lifetime     How long the credentials are good for.
+     *
+     * @return  void
+     *
+     * @since   1.0
+     * @throws  \LogicException
+     */
+    public function initialise($clientId, $clientSecret, $callbackUrl, $lifetime = 0)
 	{
-		throw new LogicException('Only new credentials can be initialised.');
+		throw new \LogicException('Only new credentials can be initialised.');
 	}
 
 	/**
@@ -86,10 +87,10 @@ class Revoked extends State
 	 * @return  State
 	 *
 	 * @since   1.0
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 */
 	public function revoke()
 	{
-		throw new LogicException('Only token credentials can be revoked.');
+		throw new \LogicException('Only token credentials can be revoked.');
 	}
 }

@@ -11,7 +11,6 @@ namespace Joomla\OAuth2\Credentials\State;
 use Joomla\CMS\Factory;
 use Joomla\OAuth2\Credentials\Credentials;
 use Joomla\OAuth2\Credentials\State;
-use Joomla\OAuth2\Credentials\State\Authorised;
 use DateInterval;
 
 /**

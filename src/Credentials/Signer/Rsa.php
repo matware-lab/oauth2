@@ -9,7 +9,6 @@
 namespace Joomla\OAuth2\Credentials\Signer;
 
 use Joomla\OAuth2\Credentials\Signer;
-use PHPUnit\Runner\Exception;
 
 /**
  * OAuth RSA-SHA1 Signature Method class.
@@ -18,7 +17,7 @@ use PHPUnit\Runner\Exception;
  * @subpackage  OAuth2
  * @since       1.0
  */
-class SignerRSA implements Signer
+class Rsa extends Signer
 {
 	/**
 	 * @var    string  Either a PEM formatted private key or a string having the format file://path/to/file.pem. The named file must contain
@@ -61,7 +60,7 @@ class SignerRSA implements Signer
 	 * @return  string  The OAuth message signature.
 	 *
 	 * @since   1.0
-	 * @throws  InvalidArgumentException
+	 * @throws  \InvalidArgumentException
 	 */
 	public function sign($baseString, $clientSecret, $credentialSecret)
 	{
@@ -73,7 +72,7 @@ class SignerRSA implements Signer
 
 		if (!$privateKey)
 		{
-			throw new RuntimeException('Unable to get the private key resource.');
+			throw new \RuntimeException('Unable to get the private key resource.');
 		}
 
 		// Sign the string using our private key resource.
@@ -81,7 +80,7 @@ class SignerRSA implements Signer
 
 		if (!$success)
 		{
-			throw new RuntimeException('Unable to generate the signature.');
+			throw new \RuntimeException('Unable to generate the signature.');
 		}
 
 		// Let's clean up after ourselves.

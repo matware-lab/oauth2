@@ -166,6 +166,11 @@ class Request
 		$this->method = $this->input->getMethod();
 	}
 
+	public function getUri()
+	{
+		return $this->uri;
+	}
+
 	/**
 	 * Check if the incoming Request is signed using OAuth 2.0.  To determine this, OAuth parameters are searched
 	 * for in the order of precedence as follows:

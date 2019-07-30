@@ -11,7 +11,6 @@ namespace Joomla\OAuth2\Controller;
 use Joomla\Application\AbstractWebApplication;
 use Joomla\Controller\AbstractController;
 use Joomla\OAuth2\Protocol\Request;
-use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Table\ClientsTable;
 
 

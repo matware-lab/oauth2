@@ -11,7 +11,6 @@ namespace Joomla\OAuth2\Credentials\State;
 use Joomla\CMS\Factory;
 use Joomla\OAuth2\Credentials\State;
 use Joomla\OAuth2\Credentials\Credentials;
-use Joomla\OAuth2\Credentials\State\Temporary;
 use LogicException;
 use DateInterval;
 
@@ -91,6 +90,8 @@ class Initial extends State
 		$this->table->callback_url = $callbackUrl;
 		$this->table->client_id = $clientId;
 		$this->table->client_secret = $clientSecret;
+
+		// TODO: Nope - this MUST be filtered
 		$this->table->client_ip = $_SERVER['REMOTE_ADDR'];
 		$this->table->temporary_token = $this->randomKey();
 		$this->table->resource_uri = $callbackUrl;
