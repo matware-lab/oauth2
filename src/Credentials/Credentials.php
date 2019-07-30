@@ -256,7 +256,7 @@ class Credentials
 	 * a resource owner.
 	 *
 	 * @param   string $clientId The key of the client requesting the temporary credentials.
-     * @param   string $url      The url being accessed in the request.
+	 * @param   string $url      The url being accessed in the request.
 	 * @param   string $lifetime The lifetime limit of the token.
 	 *
 	 * @return  void
@@ -283,50 +283,50 @@ class Credentials
 	 */
 	public function doJoomlaAuthentication(ClientsTable $client)
 	{
-        // Build the response for the client.
-        $types = array('PHP_AUTH_', 'PHP_HTTP_', 'PHP_');
+		// Build the response for the client.
+		$types = array('PHP_AUTH_', 'PHP_HTTP_', 'PHP_');
 
-        foreach ($types as $type)
-        {
-            if (isset($this->request->_headers[$type . 'USER']))
-            {
-                $user_decode = base64_decode($this->request->_headers[$type . 'USER']);
-            }
+		foreach ($types as $type)
+		{
+			if (isset($this->request->_headers[$type . 'USER']))
+			{
+				$user_decode = base64_decode($this->request->_headers[$type . 'USER']);
+			}
 
-            if (isset($this->request->_headers[$type . 'PW']))
-            {
-                $password_decode = base64_decode($this->request->_headers[$type . 'PW']);
-            }
-        }
+			if (isset($this->request->_headers[$type . 'PW']))
+			{
+				$password_decode = base64_decode($this->request->_headers[$type . 'PW']);
+			}
+		}
 
-        // Check if the username and password are present
-        if (!isset($user_decode) || !isset($password_decode))
-        {
-            if (isset($this->request->client_id))
-            {
-                $user_decode = explode(":", base64_decode($this->request->client_id));
-                $user_decode = $user_decode[0];
-            }
+		// Check if the username and password are present
+		if (!isset($user_decode) || !isset($password_decode))
+		{
+			if (isset($this->request->client_id))
+			{
+				$user_decode = explode(":", base64_decode($this->request->client_id));
+				$user_decode = $user_decode[0];
+			}
 
-            if (isset($this->request->client_secret))
-            {
-                $password_decode = explode(":", base64_decode($this->request->client_secret));
-                $password_decode = base64_decode($password_decode[1]);
-                $password_decode = explode(":", $password_decode);
-                $password_decode = $password_decode[0];
-            }
-        }
+			if (isset($this->request->client_secret))
+			{
+				$password_decode = explode(":", base64_decode($this->request->client_secret));
+				$password_decode = base64_decode($password_decode[1]);
+				$password_decode = explode(":", $password_decode);
+				$password_decode = $password_decode[0];
+			}
+		}
 
-        // Check if the username and password are present
-        if (!isset($user_decode) || !isset($password_decode))
-        {
-            throw new \Exception('Username or password is not set');
-        }
+		// Check if the username and password are present
+		if (!isset($user_decode) || !isset($password_decode))
+		{
+			throw new \Exception('Username or password is not set');
+		}
 
-        // Verify the password
-        $match = UserHelper::verifyPassword($password_decode, $client->password, $client->id);
+		// Verify the password
+		$match = UserHelper::verifyPassword($password_decode, $client->password, $client->id);
 
-        return $match;
+		return $match;
 	}
 
 	/**
