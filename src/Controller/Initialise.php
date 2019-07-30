@@ -50,6 +50,7 @@ class Initialise extends Base
 		// Initialize the credentials for this Request
 		$credentials->initialise(
 			$client->id,
+			$this->app->get('uri.request'),
 			$this->app->get('oauth.tokenlifetime', 'PT4H')
 		);
 

@@ -256,6 +256,7 @@ class Credentials
 	 * a resource owner.
 	 *
 	 * @param   string $clientId The key of the client requesting the temporary credentials.
+     * @param   string $url      The url being accessed in the request.
 	 * @param   string $lifetime The lifetime limit of the token.
 	 *
 	 * @return  void
@@ -263,11 +264,11 @@ class Credentials
 	 * @throws  \LogicException
 	 * @since   1.0
 	 */
-	public function initialise($clientId, $lifetime = 'PT4H')
+	public function initialise($clientId, $url, $lifetime = 'PT4H')
 	{
 		$clientSecret = $this->signer->secretDecode($this->request->client_secret);
 
-		$this->state = $this->state->initialise($clientId, $clientSecret, (string) $this->request->getUri(), $lifetime);
+		$this->state = $this->state->initialise($clientId, $clientSecret, $url, $lifetime);
 	}
 
 	/**

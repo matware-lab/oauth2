@@ -8,8 +8,8 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
-use Joomla\Input\Input;
 use Joomla\OAuth2\Protocol\Request;
+use Joomla\Input\Input;
 
 /**
  * RequestPost class
@@ -23,7 +23,7 @@ class RequestPost implements RequestInterface
 	 * @var    Input  The Joomla Input Object.
 	 * @since  1.0
 	 */
-	private $_input;
+	private $input;
 
 	/**
 	 * Object constructor.

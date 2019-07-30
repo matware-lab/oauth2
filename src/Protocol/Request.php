@@ -31,12 +31,6 @@ class Request
 	private $input;
 
 	/**
-	 * @var    string  The HTTP Request method for the message.
-	 * @since  1.0
-	 */
-	public $method;
-
-	/**
 	 * @var    array  Associative array of parameters for the REST message.
 	 * @since  1.0
 	 */
@@ -78,12 +72,6 @@ class Request
 		'password',
 		'refresh_token'
 	);
-
-	/**
-	 * @var    Uri  The Request URI for the message.
-	 * @since  1.0
-	 */
-	private $uri;
 
 	/**
 	 * Get the list of reserved OAuth 2.0 parameters.
@@ -158,17 +146,6 @@ class Request
 	{
 		// Setup the database object.
 		$this->input = $app->input;
-
-		// Get URI
-		$this->uri = new Uri($app->get('uri.request'));
-
-		// Getting the Request method (POST||GET)
-		$this->method = $this->input->getMethod();
-	}
-
-	public function getUri()
-	{
-		return $this->uri;
 	}
 
 	/**
@@ -176,8 +153,7 @@ class Request
 	 * for in the order of precedence as follows:
 	 *
 	 *   * Authorization header.
-	 *   * POST variables.
-	 *   * GET query string variables.
+	 *   * POST variables/GET query string variables.
 	 *
 	 * @return  boolean  True if parameters found, false otherwise.
 	 *
@@ -185,9 +161,6 @@ class Request
 	 */
 	public function fetchMessageFromRequest()
 	{
-		// Init flag
-		$flag = false;
-
 		// Loading the response class
 		$requestHeader = new RequestHeader;
 
@@ -203,15 +176,13 @@ class Request
 				// Bind the found parameters to the OAuth 2.0 message.
 				$this->setParameters($this->_headers);
 
-				$flag = true;
+				// We found something in the Auth Header - we don't need to look any further so bail.
+				return true;
 			}
 		}
 
-		// Getting the method
-		$method = strtolower($this->method);
-
 		// Building the class name
-		$class = '\Joomla\OAuth2\Protocol\Request\Request' . ucfirst($method);
+		$class = '\\Joomla\\OAuth2\\Protocol\\Request\\Request' . ucfirst(strtolower($this->input->getMethod()));
 
 		/** @var  RequestInterface $request */
 		$request = new $class($this->input);
@@ -224,11 +195,11 @@ class Request
 			// Bind the found parameters to the OAuth 2.0 message.
 			$this->setParameters($params);
 
-			$flag = true;
+			return true;
 		}
 
 		// TODO: Check errors
 
-		return $flag;
+		return false;
 	}
 }
