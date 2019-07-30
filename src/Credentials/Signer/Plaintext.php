@@ -9,7 +9,6 @@
 namespace Joomla\OAuth2\Credentials\Signer;
 
 use Joomla\OAuth2\Credentials\Signer;
-use PHPUnit\Runner\Exception;
 
 /**
  * OAuth PLAINTEXT Signature Method class.

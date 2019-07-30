@@ -8,8 +8,6 @@
 
 namespace Joomla\OAuth2\Controller;
 
-use Joomla\OAuth2\Protocol\Request;
-use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Credentials\Credentials;
 use Joomla\CMS\Factory;
 
@@ -25,26 +23,6 @@ use Joomla\CMS\Factory;
  */
 class Authorise extends Base
 {
-	/**
-	 * Constructor.
-	 *
-	 * @param   Request   $request   The Request object
-	 * @param   Response  $response  The response object
-	 *
-	 * @since   1.0
-	 */
-	public function __construct(Request $request = null, Response $response = null)
-	{
-		// Call parent first
-		parent::__construct();
-
-		// Setup the Request object.
-		$this->request = isset($request) ? $request : new Request;
-
-		// Setup the response object.
-		$this->response = isset($response) ? $response : new Response;
-	}
-
 	/**
 	 * Handle the Request.
 	 *
@@ -112,7 +90,7 @@ class Authorise extends Base
  		$body = $this->prepareBody($response);
 
 		// Set the response code and body.
-		$this->response->setHeader('status', '200')
+		$this->app->setHeader('status', '200')
 			->setBody($body)
 			->respond();
 

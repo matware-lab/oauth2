@@ -67,16 +67,17 @@ class Denied extends State
 	 * Method to initialise the credentials.  This will persist a temporary credentials set to be authorised by
 	 * a resource owner.
 	 *
-	 * @param   string   $clientKey    The key of the client requesting the temporary credentials.
-	 * @param   string   $callbackUrl  The callback URL to set for the temporary credentials.
-	 * @param   integer  $lifetime     How long the credentials are good for.
+     * @param   string  $clientId      The key of the client requesting the temporary credentials.
+     * @param   string  $clientSecret  The secret key of the client requesting the temporary credentials.
+     * @param   string  $callbackUrl   The callback URL to set for the temporary credentials.
+     * @param   string  $lifetime      How long (DateInterval format) the temporary credentials should be valid (defaults to 60 minutes).
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0
 	 * @throws  LogicException
 	 */
-	public function initialise($clientKey, $callbackUrl, $lifetime = 0)
+	public function initialise($clientId, $clientSecret, $callbackUrl, $lifetime = 'PT4H')
 	{
 		throw new LogicException('Only new credentials can be initialised.');
 	}

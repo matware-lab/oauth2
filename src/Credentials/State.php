@@ -29,15 +29,15 @@ abstract class State
 	 * Object constructor.
 	 *
 	 * @param   CredentialsTable  $table       The database driver to use when persisting the object.
-	 * @param   array              $properties  A set of properties with which to prime the object.
+	 * @param   array             $properties  A set of properties with which to prime the object.
 	 *
 	 * @codeCoverageIgnore
 	 * @since   1.0
 	 */
-	public function __construct(CredentialsTable $table = null, array $properties = null)
+	public function __construct(CredentialsTable $table, array $properties = null)
 	{
 		// Setup the table object.
-		$this->table = $table ? $table : new CredentialsTable();
+		$this->table = $table;
 
 		// Iterate over any input properties and bind them to the object.
 		if ($properties)
@@ -90,7 +90,7 @@ abstract class State
 	 *
 	 * @return  State
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	abstract public function authorise($resourceOwnerId, $lifetime = 0);
@@ -100,7 +100,7 @@ abstract class State
 	 *
 	 * @return  State
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	abstract public function convert();
@@ -110,7 +110,7 @@ abstract class State
 	 *
 	 * @return  State
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	abstract public function deny();
@@ -128,7 +128,7 @@ abstract class State
 	 *
 	 * @return  State
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	abstract public function initialise($clientId, $clientSecret, $callbackUrl, $lifetime = 'PT4H');
@@ -138,7 +138,7 @@ abstract class State
 	 *
 	 * @return  State
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	abstract public function revoke();

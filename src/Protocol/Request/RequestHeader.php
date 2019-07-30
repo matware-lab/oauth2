@@ -9,6 +9,7 @@
 namespace Joomla\OAuth2\Protocol\Request;
 
 use Joomla\Application\AbstractApplication;
+use Joomla\Input\Input;
 use Joomla\Uri\Uri;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\CMS\Factory;
@@ -22,16 +23,22 @@ use Joomla\CMS\Factory;
 class RequestHeader
 {
 	/**
+	 * @var    Input  The Joomla Input Object.
+	 * @since  1.0
+	 */
+	private $input;
+
+	/**
 	 * Object constructor.
+	 *
+	 * @param   Input  $input  The Joomla Input Object
 	 *
 	 * @since   1.0
 	 */
-	public function __construct()
+	public function __construct(Input $input)
 	{
-		$this->app = Factory::getApplication();
-
 		// Setup the database object.
-		$this->_input = $this->app->input;
+		$this->input = $input;
 	}
 
 	/**
@@ -55,19 +62,19 @@ class RequestHeader
 		}
 
 		// Otherwise we need to look in the $_SERVER superglobal.
-		elseif ($this->_input->server->getString('HTTP_AUTHORIZATION', false))
+		elseif ($this->input->server->getString('HTTP_AUTHORIZATION', false))
 		{
-			return trim($this->_input->server->getString('HTTP_AUTHORIZATION'));
+			return trim($this->input->server->getString('HTTP_AUTHORIZATION'));
 		}
 
-		elseif ($this->_input->server->getString('HTTP_AUTH_USER', false))
+		elseif ($this->input->server->getString('HTTP_AUTH_USER', false))
 		{
-			return trim($this->_input->server->getString('HTTP_AUTH_USER'));
+			return trim($this->input->server->getString('HTTP_AUTH_USER'));
 		}
 
-		elseif ($this->_input->server->getString('HTTP_USER', false))
+		elseif ($this->input->server->getString('HTTP_USER', false))
 		{
-			return trim($this->_input->server->getString('HTTP_USER'));
+			return trim($this->input->server->getString('HTTP_USER'));
 		}
 
 		return false;
@@ -192,31 +199,5 @@ class RequestHeader
 		}
 
 		return $headers;
-	}
-
-	/**
-	 * Authenticate an identity using HTTP Basic authentication for the Request.
-	 *
-	 * @return  integer  Identity ID for the authenticated identity.
-	 *
-	 * @since   1.0
-	 */
-	protected function doBasicAuthentication()
-	{
-		// If we have basic auth information attempt to authenticate.
-		$username = $this->_input->server->getString('OAUTH_CLIENT_ID');
-
-		if ($username)
-		{
-			$password = $this->_input->server->getString('PHP_AUTH_PW');
-
-			$identityId = $this->doPasswordAuthentication($username, $password);
-
-			return $identityId;
-		}
-		else
-		{
-			return 0;
-		}
 	}
 }

@@ -8,7 +8,8 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
-use Joomla\CMS\Factory;
+use Joomla\OAuth2\Protocol\Request;
+use Joomla\Input\Input;
 
 /**
  * RequestPost class
@@ -16,19 +17,25 @@ use Joomla\CMS\Factory;
  * @package  Joomla.Framework
  * @since    1.0
  */
-class RequestPost
+class RequestPost implements RequestInterface
 {
+	/**
+	 * @var    Input  The Joomla Input Object.
+	 * @since  1.0
+	 */
+	private $input;
+
 	/**
 	 * Object constructor.
 	 *
+	 * @param   Input  $input  The Joomla Input Object
+	 *
 	 * @since   1.0
 	 */
-	public function __construct()
+	public function __construct(Input $input)
 	{
-		$this->app = Factory::getApplication();
-
 		// Setup the database object.
-		$this->_input = $this->app->input;
+		$this->input = $input;
 	}
 
 	/**
@@ -41,8 +48,8 @@ class RequestPost
 	public function processVars()
 	{
 		// If we aren't handling a post Request with urlencoded vars then there is nothing to do.
-		if (strtoupper($this->_input->getMethod()) != 'POST'
-			|| !strpos($this->_input->server->get('CONTENT_TYPE', ''), 'x-www-form-urlencoded') )
+		if (strtoupper($this->input->getMethod()) !== 'POST'
+			|| !strpos($this->input->server->get('CONTENT_TYPE', ''), 'x-www-form-urlencoded') )
 		{
 			return false;
 		}
@@ -53,9 +60,11 @@ class RequestPost
 		// Iterate over the reserved parameters and look for them in the POST variables.
 		foreach (Request::getReservedParameters() as $k)
 		{
-			if ($this->_input->post->getString('oauth_' . $k, false))
+			$value = $this->input->post->getString('oauth_' . $k, false);
+
+			if ($value)
 			{
-				$parameters['OAUTH_' . strtoupper($k)] = trim($this->_input->post->getString('oauth_' . $k));
+				$parameters['OAUTH_' . strtoupper($k)] = trim($value);
 			}
 		}
 

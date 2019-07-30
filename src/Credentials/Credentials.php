@@ -8,8 +8,8 @@
 
 namespace Joomla\OAuth2\Credentials;
 
+use Joomla\Database\DatabaseDriver;
 use Joomla\OAuth2\Protocol\Request;
-use Joomla\OAuth2\Credentials\Signer;
 use Joomla\OAuth2\Credentials\State\Initial;
 use Joomla\OAuth2\Credentials\State\Authorised;
 use Joomla\OAuth2\Credentials\State\Temporary;
@@ -17,6 +17,7 @@ use Joomla\OAuth2\Credentials\State\Token;
 use Joomla\OAuth2\Table\CredentialsTable;
 use Joomla\OAuth2\Table\ClientsTable;
 use Joomla\CMS\Factory;
+use Joomla\CMS\User\UserHelper;
 use InvalidArgumentException;
 
 /**
@@ -65,37 +66,26 @@ class Credentials
 	public $request;
 
 	/**
-	 * @var    Oauth2CredentialsSigner   The current credential signer.
+	 * @var    Signer   The current credential signer.
 	 * @since  1.0
 	 */
-	public $signal;
+	public $signer;
 
 	/**
 	 * Object constructor.
 	 *
-	 * @param   Request     $request The HTTP Request
-	 * @param   Credentials $table   Connector object for table class.
+	 * @param   Request         $request  The HTTP Request
+	 * @param   DatabaseDriver  $db       The database driver object. TODO: Make required
 	 *
 	 * @since   1.0
 	 */
-	public function __construct(Request $request, CredentialsTable $table = null)
+	public function __construct(Request $request, DatabaseDriver $db = null)
 	{
-		// Load the HTTP Request
-		$this->request = $request ? $request : new Request;
-
-		// Get the database instance
-		$this->db = Factory::getDbo();
-
-		// Setup the database object.
-		$this->table = $table ? $table : new CredentialsTable();
-
-		// Assume the base state for any credentials object to be new.
-		$this->state = new Initial($this->table);
-
-		// Setup the correct signer
-		$signature = isset($this->request->signature_method) ? $this->request->signature_method : 'PLAINTEXT';
-
-		$this->signer = Signer::getInstance($signature);
+		$this->request = $request;
+		$this->table   = new CredentialsTable($db ?: Factory::getDbo());
+		$this->state   = new Initial($this->table);
+		$signature     = $this->request->signature_method ?? 'PLAINTEXT';
+		$this->signer  = Signer::getInstance($signature);
 	}
 
 	/**
@@ -106,7 +96,7 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	public function authorise($resourceOwnerId)
@@ -119,7 +109,7 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	public function convert()
@@ -132,7 +122,7 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	public function deny()
@@ -266,18 +256,19 @@ class Credentials
 	 * a resource owner.
 	 *
 	 * @param   string $clientId The key of the client requesting the temporary credentials.
+	 * @param   string $url      The url being accessed in the request.
 	 * @param   string $lifetime The lifetime limit of the token.
 	 *
 	 * @return  void
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
-	public function initialise($clientId, $lifetime = 'PT4H')
+	public function initialise($clientId, $url, $lifetime = 'PT4H')
 	{
 		$clientSecret = $this->signer->secretDecode($this->request->client_secret);
 
-		$this->state = $this->state->initialise($clientId, $clientSecret, $this->request->_fetchRequestUrl(), $lifetime);
+		$this->state = $this->state->initialise($clientId, $clientSecret, $url, $lifetime);
 	}
 
 	/**
@@ -292,7 +283,50 @@ class Credentials
 	 */
 	public function doJoomlaAuthentication(ClientsTable $client)
 	{
-		return $this->signer->doJoomlaAuthentication($client, $this->request);
+		// Build the response for the client.
+		$types = array('PHP_AUTH_', 'PHP_HTTP_', 'PHP_');
+
+		foreach ($types as $type)
+		{
+			if (isset($this->request->_headers[$type . 'USER']))
+			{
+				$user_decode = base64_decode($this->request->_headers[$type . 'USER']);
+			}
+
+			if (isset($this->request->_headers[$type . 'PW']))
+			{
+				$password_decode = base64_decode($this->request->_headers[$type . 'PW']);
+			}
+		}
+
+		// Check if the username and password are present
+		if (!isset($user_decode) || !isset($password_decode))
+		{
+			if (isset($this->request->client_id))
+			{
+				$user_decode = explode(":", base64_decode($this->request->client_id));
+				$user_decode = $user_decode[0];
+			}
+
+			if (isset($this->request->client_secret))
+			{
+				$password_decode = explode(":", base64_decode($this->request->client_secret));
+				$password_decode = base64_decode($password_decode[1]);
+				$password_decode = explode(":", $password_decode);
+				$password_decode = $password_decode[0];
+			}
+		}
+
+		// Check if the username and password are present
+		if (!isset($user_decode) || !isset($password_decode))
+		{
+			throw new \Exception('Username or password is not set');
+		}
+
+		// Verify the password
+		$match = UserHelper::verifyPassword($password_decode, $client->password, $client->id);
+
+		return $match;
 	}
 
 	/**
@@ -394,7 +428,7 @@ class Credentials
 	 *
 	 * @return  void
 	 *
-	 * @throws  LogicException
+	 * @throws  \LogicException
 	 * @since   1.0
 	 */
 	public function revoke()

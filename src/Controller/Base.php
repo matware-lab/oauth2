@@ -8,8 +8,9 @@
 
 namespace Joomla\OAuth2\Controller;
 
-use Joomla\CMS\Factory;
+use Joomla\Application\AbstractWebApplication;
 use Joomla\Controller\AbstractController;
+use Joomla\OAuth2\Protocol\Request;
 use Joomla\OAuth2\Table\ClientsTable;
 
 
@@ -20,35 +21,29 @@ use Joomla\OAuth2\Table\ClientsTable;
  * @subpackage  OAuth2
  * @since       1.0
  */
-class Base extends AbstractController
+abstract class Base extends AbstractController
 {
-	/**
-	 * Method required by AbstractController
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0
-	 */
-	public function execute()
-	{
-	}
+    /**
+     * The request object
+     *
+     * @var  Request
+     */
+    protected $request;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param   Request   $request   The Request object
-	 * @param   Response  $response  The response object
+	 * @param   Request                 $request   The Request object
+     * @param   AbstractWebApplication  $app       The application object
 	 *
 	 * @since   1.0
 	 * @throws
 	 */
-	public function __construct(Request $request = null, Response $response = null)
+	public function __construct(Request $request, AbstractWebApplication $app)
 	{
-		// Call parent first
-		parent::__construct();
+        $this->request = $request;
 
-		// Setup the Request object.
-		$this->app = Factory::getApplication();
+		parent::__construct($app->input, $app);
 	}
 
 	/**
@@ -70,8 +65,6 @@ class Base extends AbstractController
 		if (!isset($this->request->access_token) && (!$this->request->client_id || !$this->request->client_secret || !$this->request->signature_method) )
 		{
 			$this->respondError(400, 'invalid_request', 'Invalid OAuth Request signature.');
-
-			return false;
 		}
 	}
 
@@ -83,7 +76,6 @@ class Base extends AbstractController
 	 * @return  ClientsTable
 	 *
 	 * @since   1.0
-	 * @throws  InvalidArgumentException
 	 */
 	public function fetchClient($client_id)
 	{
@@ -113,12 +105,11 @@ class Base extends AbstractController
 	/**
 	 * Return the JSON message for CORS or simple Request.
 	 *
-	 * @param   string	$message	The return message
+	 * @param   array	$message	The return message
 	 *
 	 * @return  string	$body	    The message prepared if CORS is enabled, or same if false.
 	 *
 	 * @since   1.0
-	 * @throws  InvalidArgumentException
 	 */
 	public function prepareBody($message)
 	{
@@ -126,8 +117,10 @@ class Base extends AbstractController
 
 		if ($callback !== false)
 		{
-			$body = $callback . "(".json_encode($message).")";
-		}else{
+			$body = $callback . '(' . json_encode($message) . ')';
+		}
+		else
+		{
 			$body = json_encode($message);
 		}
 
@@ -141,10 +134,9 @@ class Base extends AbstractController
 	 * @param   string  $code     The OAuth2 framework error code
 	 * @param   string  $message  The error description
 	 *
-	 * @return  none
+	 * @return  void
 	 *
 	 * @since   1.0
-	 * @throws  InvalidArgumentException
 	 */
 	public function respondError($status, $code, $message)
 	{
@@ -153,10 +145,10 @@ class Base extends AbstractController
 			'error_description' => $message
 		);
 
-		$this->response->setHeader('status', $status)
+		$this->app->setHeader('status', $status)
 			->setBody(json_encode($response))
 			->respond();
 
-		exit;
+		$this->app->close();
 	}
 }
