@@ -8,9 +8,8 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
-use Joomla\CMS\Factory;
-use Joomla\Uri\Uri;
 use Joomla\OAuth2\Protocol\Request;
+use Joomla\Input\Input;
 
 /**
  * RequestOptions class
@@ -18,19 +17,25 @@ use Joomla\OAuth2\Protocol\Request;
  * @package  Joomla.Framework
  * @since    1.0
  */
-class RequestOptions
+class RequestOptions implements RequestInterface
 {
+	/**
+	 * @var    Input  The Joomla Input Object.
+	 * @since  1.0
+	 */
+	private $input;
+
 	/**
 	 * Object constructor.
 	 *
+	 * @param   Input  $input  The Joomla Input Object
+	 *
 	 * @since   1.0
 	 */
-	public function __construct()
+	public function __construct(Input $input)
 	{
-		$this->app = Factory::getApplication();
-
 		// Setup the database object.
-		$this->_input = $this->app->input;
+		$this->input = $input;
 	}
 
 	/**
@@ -42,22 +47,22 @@ class RequestOptions
 	 */
 	public function processVars()
 	{
-		// Get a JURI instance for the Request URL.
-		$uri = new Uri($this->app->get('uri.Request'));
-
 		// Initialise params array.
 		$params = array();
 
 		// Iterate over the reserved parameters and look for them in the POST variables.
 		foreach (Request::getReservedParameters() as $k)
 		{
-			if ($this->_input->get->getString('oauth_' . $k, false))
+			$value = $this->input->get->getString('oauth_' . $k, false);
+
+			if ($value)
 			{
-				$params['OAUTH_' . strtoupper($k)] = trim($this->_input->get->getString('oauth_' . $k));
+				$params['OAUTH_' . strtoupper($k)] = trim($value);
 			}
 		}
 
 		// Make sure that any found oauth_signature is not included.
+		// TODO: I think this should this be oauth_signature instead of signature (and probably uppercase?)
 		unset($params['signature']);
 
 		// Ensure the parameters are in order by key.

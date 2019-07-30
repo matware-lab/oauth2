@@ -11,9 +11,8 @@ namespace Joomla\OAuth2;
 use Joomla\Registry\Registry;
 use Joomla\Http\Http;
 use Joomla\CMS\Application;
-use Joomla\CMS\Factory;
+use Joomla\Application\AbstractWebApplication;
 use Joomla\OAuth2\Protocol\Request;
-use Joomla\OAuth2\Protocol\Response;
 use Joomla\OAuth2\Controller\Initialise;
 use Joomla\OAuth2\Controller\Authorise;
 use Joomla\OAuth2\Controller\Convert;
@@ -34,6 +33,12 @@ class Server
 	protected $options;
 
 	/**
+	 * @var    AbstractApplication  The Web Application receiving the request.
+	 * @since  1.0
+	 */
+	protected $app;
+
+	/**
 	 * @var    Http  The HTTP client object to use in sending HTTP requests.
 	 * @since  1.0
 	 */
@@ -46,22 +51,17 @@ class Server
 	protected $request;
 
 	/**
-	 * @var    Request  The input object to use in retrieving GET/POST data.
-	 * @since  1.0
-	 */
-	protected $response;
-
-	/**
 	 * Constructor.
 	 *
+	 * @param   AbstractApplication    $app      The Joomla Application Object
 	 * @param   Registry               $options  The options object.
 	 * @param   Http                   $http     The HTTP client object.
-	 * @param   Request  $request  The Request object.
+	 * @param   Request                $request  The Request object.
 	 *
 	 * @since   1.0
 	 * @throws
 	 */
-	public function __construct(Registry $options = null, Http $http = null, Request $request = null)
+	public function __construct(AbstractWebApplication $app, Registry $options = null, Http $http = null, Request $request = null)
 	{
 		// Setup the options object.
 		$this->options = isset($options) ? $options : new Registry;
@@ -70,19 +70,17 @@ class Server
 		$this->http = isset($http) ? $http : new Http($this->options);
 
 		// Setup the Request object.
-		$this->request = isset($request) ? $request : new Request;
-
-		// Setup the response object.
-		$this->response = isset($response) ? $response : new Response;
+		$this->request = isset($request) ? $request : new Request($app);
 
 		// Get application instance
-		$this->app = Factory::getApplication();
+		$this->app = $app;
 	}
 
 	/**
 	 * Method to get the REST parameters for the current Request. Parameters are retrieved from these locations
 	 * in the order of precedence as follows:
 	 *
+     * TODO: I think this is either GET or POST or Options after Auth Header not both Post and Get
 	 *   - Authorization header
 	 *   - POST variables
 	 *   - GET query string variables
@@ -125,7 +123,7 @@ class Server
 
 					break;
 				default:
-					throw new InvalidArgumentException('No valid response type was found.');
+					throw new \InvalidArgumentException('No valid response type was found.');
 					break;
 			}
 

@@ -8,14 +8,13 @@
 
 namespace Joomla\OAuth2\Protocol;
 
+use Joomla\Application\AbstractWebApplication;
+use Joomla\Input\Input;
+use Joomla\OAuth2\Protocol\Request\RequestInterface;
 use Joomla\Uri\Uri;
 use Joomla\CMS\Factory;
 use Joomla\OAuth2\Table\CredentialsTable;
-use Joomla\OAuth2\Protocol\Response;
-use Joomla\OAuth2\Protocol\Request\RequestGet;
-use Joomla\OAuth2\Protocol\Request\RequestPost;
 use Joomla\OAuth2\Protocol\Request\RequestHeader;
-use Joomla\OAuth2\Protocol\Request\RequestOptions;
 
 /**
  * Request class
@@ -25,6 +24,12 @@ use Joomla\OAuth2\Protocol\Request\RequestOptions;
  */
 class Request
 {
+	/**
+	 * @var    Input  The Joomla Input Object.
+	 * @since  1.0
+	 */
+	private $input;
+
 	/**
 	 * @var    string  The HTTP Request method for the message.
 	 * @since  1.0
@@ -75,7 +80,7 @@ class Request
 	);
 
 	/**
-	 * @var    JURI  The Request URI for the message.
+	 * @var    Uri  The Request URI for the message.
 	 * @since  1.0
 	 */
 	private $uri;
@@ -143,28 +148,22 @@ class Request
 	/**
 	 * Object constructor.
 	 *
-	 * @param   CredentialsTable $table Connector object for table class.
+	 * @param   AbstractWebApplication  $app    The Joomla Application Object
+	 * @param   CredentialsTable        $table  Connector object for table class.
 	 *
 	 * @since   1.0
 	 * @throws
 	 */
-	public function __construct(CredentialsTable $table = null)
+	public function __construct(AbstractWebApplication $app, CredentialsTable $table = null)
 	{
-		// Load the Joomla! application
-		$this->app = Factory::getApplication();
-
 		// Setup the database object.
-		$this->input = $this->app->input;
+		$this->input = $app->input;
 
 		// Get URI
-		$this->uri = new Uri($this->_fetchRequestUrl());
+		$this->uri = new Uri($app->get('uri.request'));
 
 		// Getting the Request method (POST||GET)
-		$requestMethod = $this->input->server->getString('REQUEST_METHOD');
-		$this->method  = strtoupper($requestMethod);
-
-		// Loading the response class
-		$this->response = new Response;
+		$this->method = $this->input->getMethod();
 	}
 
 	/**
@@ -209,8 +208,8 @@ class Request
 		// Building the class name
 		$class = '\Joomla\OAuth2\Protocol\Request\Request' . ucfirst($method);
 
-		// Creating the class
-		$request = new $class;
+		/** @var  RequestInterface $request */
+		$request = new $class($this->input);
 
 		// If we didn't find an Authorization header or didn't find anything in it try the POST variables.
 		$params = $request->processVars();
@@ -226,122 +225,5 @@ class Request
 		// TODO: Check errors
 
 		return $flag;
-	}
-
-	/**
-	 * Encode a string according to the RFC3986
-	 *
-	 * @param   string $s string to encode
-	 *
-	 * @return  string encoded string
-	 *
-	 * @link    http://www.ietf.org/rfc/rfc3986.txt
-	 * @since   1.0
-	 */
-	public function encode($s)
-	{
-		return str_replace('%7E', '~', rawurlencode((string) $s));
-	}
-
-	/**
-	 * Decode a string according to RFC3986.
-	 * Also correctly decodes RFC1738 urls.
-	 *
-	 * @param   string $s string to decode
-	 *
-	 * @return  string  decoded string
-	 *
-	 * @link    http://www.ietf.org/rfc/rfc1738.txt
-	 * @link    http://www.ietf.org/rfc/rfc3986.txt
-	 * @since   1.0
-	 */
-	public function decode($s)
-	{
-		return rawurldecode((string) $s);
-	}
-
-	/**
-	 * Method to detect and return the requested URI from server environment variables.
-	 *
-	 * @return  string  The requested URI
-	 *
-	 * @since   1.0
-	 */
-	public function _fetchRequestUrl()
-	{
-		// Initialise variables.
-		$uri = '';
-
-		// First we need to detect the URI scheme.
-		$https = $this->input->server->getString('HTTPS');
-		if (isset($https) && !empty($https) && (strtolower($https) != 'off'))
-		{
-			$scheme = 'https://';
-		}
-		else
-		{
-			$scheme = 'http://';
-		}
-
-		/*
-		 * There are some differences in the way that Apache and IIS populate server environment variables.  To
-		 * properly detect the requested URI we need to adjust our algorithm based on whether or not we are getting
-		 * information from Apache or IIS.
-		 */
-
-		// If PHP_SELF and REQUEST_URI are both populated then we will assume "Apache Mode".
-		$httpHost    = $this->input->server->getString('HTTP_HOST');
-		$phpSelf     = $this->input->server->getString('PHP_SELF');
-		$requestUri  = $this->input->server->getString('REQUEST_URI');
-		$scriptName  = $this->input->server->getString('SCRIPT_NAME');
-		$queryString = $this->input->server->getString('QUERY_STRING');
-
-		if (!empty($phpSelf) && !empty($requestUri))
-		{
-			// The URI is built from the HTTP_HOST and REQUEST_URI environment variables in an Apache environment.
-			$uri = $scheme . $httpHost . $requestUri;
-
-			$uri = explode("?", $uri);
-			$uri = $uri[0];
-		}
-
-		// If not in "Apache Mode" we will assume that we are in an IIS environment and proceed.
-		else
-		{
-			// IIS uses the SCRIPT_NAME variable instead of a REQUEST_URI variable... thanks, MS
-			$uri = $scheme . $httpHost . $scriptName;
-
-			// If the QUERY_STRING variable exists append it to the URI string.
-			if (isset($queryString) && !empty($queryString))
-			{
-				$uri .= '?' . $queryString;
-			}
-		}
-
-		return trim($uri);
-	}
-
-	/**
-	 * Create a token-string
-	 *
-	 * @param   integer $length Length of string
-	 *
-	 * @return  string  Generated token
-	 *
-	 * @since  1.0
-	 */
-	protected function _createToken($length = 32)
-	{
-		static $chars = '0123456789abcdef';
-		$max   = strlen($chars) - 1;
-		$token = '';
-		$name  = session_name();
-
-		for ($i = 0; $i < $length; ++$i)
-		{
-			$token .= $chars[(rand(0, $max))];
-		}
-
-		return md5($token . $name);
 	}
 }

@@ -8,9 +8,9 @@
 
 namespace Joomla\OAuth2\Protocol\Request;
 
-use Joomla\CMS\Factory;
 use Joomla\OAuth2\Protocol\Request;
 use Joomla\Uri\Uri;
+use Joomla\Input\Input;
 
 /**
  * RequestGet class
@@ -18,19 +18,25 @@ use Joomla\Uri\Uri;
  * @package  Joomla.Framework
  * @since    1.0
  */
-class RequestGet
+class RequestGet implements RequestInterface
 {
+	/**
+	 * @var    Input  The Joomla Input Object.
+	 * @since  1.0
+	 */
+	private $_input;
+
 	/**
 	 * Object constructor.
 	 *
+	 * @param   Input  $input  The Joomla Input Object
+	 *
 	 * @since   1.0
 	 */
-	public function __construct()
+	public function __construct(Input $input)
 	{
-		$this->app = Factory::getApplication();
-
 		// Setup the database object.
-		$this->_input = $this->app->input;
+		$this->_input = $input;
 	}
 
 	/**
@@ -42,22 +48,22 @@ class RequestGet
 	 */
 	public function processVars()
 	{
-		// Get a Uri instance for the Request URL.
-		$uri = new Uri($this->app->get('uri.Request'));
-
 		// Initialise params array.
 		$params = array();
 
 		// Iterate over the reserved parameters and look for them in the POST variables.
 		foreach (Request::getReservedParameters() as $k)
 		{
-			if ($this->_input->get->getString('oauth_' . $k, false))
+			$value = $this->_input->get->getString('oauth_' . $k, false);
+
+			if ($value)
 			{
-				$params['OAUTH_' . strtoupper($k)] = trim($this->_input->get->getString('oauth_' . $k));
+				$params['OAUTH_' . strtoupper($k)] = trim($value);
 			}
 		}
 
 		// Make sure that any found oauth_signature is not included.
+		// TODO: I think this should this be oauth_signature instead of signature (and probably uppercase?)
 		unset($params['signature']);
 
 		// Ensure the parameters are in order by key.
@@ -79,10 +85,13 @@ class RequestGet
 	 * @link    http://www.faqs.org/rfcs/rfc3986
 	 * @see     $this->encode()
 	 * @since   1.0
+	 *
+	 * TODO: This function appears to be unused. I assume this used to live in the Request class given the methods it
+	 *       calls. Check if it's required?
 	 */
 	public function _fetchStringForSigning($requestUrl, $requestMethod)
 	{
-		// Get a JURI instance for the Request URL.
+		// Get a Uri instance for the Request URL.
 		$uri = new Uri($requestUrl);
 
 		// Initialise base array.

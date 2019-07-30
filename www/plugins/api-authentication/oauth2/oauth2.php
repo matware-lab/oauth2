@@ -12,8 +12,8 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Authentication\Authentication;
-use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserHelper;
@@ -32,7 +32,7 @@ class PlgApiAuthenticationOAuth2 extends CMSPlugin
 	/**
 	 * The application object
 	 *
-	 * @type   Application
+	 * @type   CMSApplication
 	 * @since  1.0.0
 	 */
 	protected $app;
@@ -55,18 +55,15 @@ class PlgApiAuthenticationOAuth2 extends CMSPlugin
 	 */
 	public function onBeforeExecute()
 	{
-		//if (!$this->isSSLConnection()) {
+		//if (!$this->app->isSslConnection()) {
 		//	exit;
 		//}
 
 		// Init the flag
 		$request = false;
 
-		// Load the Joomla! application
-		$app = Factory::getApplication();
-
 		// Get the OAuth2 server instance
-		$oauth_server = new Server;
+		$oauth_server = new Server($this->app);
 
 		if ($oauth_server->listen())
 		{
@@ -184,17 +181,5 @@ class PlgApiAuthenticationOAuth2 extends CMSPlugin
 		$client->setOption('url', $url);
 
 		return $client->fetchAccessToken()->access_token;
-	}
-
-	/**
-	 * Determine if we are using a secure (SSL) connection.
-	 *
-	 * @return  boolean  True if using SSL, false if not.
-	 *
-	 * @since   1.0.0
-	 */
-	public function isSSLConnection()
-	{
-		return ((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on')) || getenv('SSL_PROTOCOL_VERSION'));
 	}
 }
